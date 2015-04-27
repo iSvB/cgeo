@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CGeo;
 using DColor = System.Drawing.Color;
 
 namespace ComputationalGeometry
@@ -27,25 +28,9 @@ namespace ComputationalGeometry
         {
             InitializeComponent();
             var bmp = new Bitmap(100, 100);
-            for (int i = 0; i < 10; ++i)
-                for (int j = 0; j < 10; ++j)
-                    bmp.SetPixel(i, j, DColor.Aqua);
-            image.Source = BitmapToImageSource(bmp);
-        }
-
-        public BitmapImage BitmapToImageSource(Bitmap bitmap)
-        {
-            using (MemoryStream memory = new MemoryStream())
-            {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapimage = new BitmapImage();
-                bitmapimage.BeginInit();
-                bitmapimage.StreamSource = memory;
-                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapimage.EndInit();
-                return bitmapimage;
-            }
-        }
+            var superstructure = Triangulation.CreateSuperstructure(new CGeo.Point(0, 0), new CGeo.Point(10, 10));
+            bmp.Draw(superstructure, DColor.AliceBlue, DColor.AliceBlue);
+            image.Source = bmp.ToImageSource();            
+        }        
     }
 }

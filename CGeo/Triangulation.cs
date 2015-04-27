@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CGeo
 {
-    public static class Algorithms
+    public static class Triangulation
     {
         public static Triangle[] CreateSuperstructure(Point topLeft, Point bottomRight)
         {
@@ -25,8 +25,8 @@ namespace CGeo
             // Set ribs for triangles.
             left.SetRibs(leftRib, bottomRib, diagonal);
             right.SetRibs(rightRib, topRib, diagonal);
-            
-            return new Triangle[] { left, right };            
+            // Return superstructure.
+            return new Triangle[] { left, right };
         }
     }
 }

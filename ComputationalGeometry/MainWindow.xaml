@@ -5,7 +5,7 @@
     <Grid>                
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition/>
+            <RowDefinition />
         </Grid.RowDefinitions>
         <!--MENU ROW-->
         <Menu>
@@ -26,6 +26,6 @@
             </MenuItem>
         </Menu>
         <!--CONTENT ROW-->               
-        <Image x:Name="image"/>
+        <Image x:Name="image" Grid.Row="1"/>
     </Grid>
 </Window>
