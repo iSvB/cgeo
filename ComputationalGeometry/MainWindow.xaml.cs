@@ -28,8 +28,6 @@ namespace ComputationalGeometry
         {
             InitializeComponent();
             var bmp = new Bitmap(100, 100);
-            var superstructure = Triangulation.CreateSuperstructure(new CGeo.Point(0, 0), new CGeo.Point(10, 10));
-            bmp.Draw(superstructure, DColor.AliceBlue, DColor.AliceBlue);
             image.Source = bmp.ToImageSource();            
         }        
     }
