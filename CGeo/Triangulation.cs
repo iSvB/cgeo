@@ -8,6 +8,12 @@ namespace CGeo
 {
     public static class Triangulation
     {
+        /// <summary>
+        /// Creates superstructure in defined rectangle.
+        /// </summary>
+        /// <param name="topLeft">Top left vertex of rectangle.</param>
+        /// <param name="bottomRight">Bottom right vertex of rectangle.</param>
+        /// <returns>Superstructure represented as set of triangles.</returns>
         public static IEnumerable<Triangle> CreateSuperstructure(Point topLeft, Point bottomRight)
         {
             // Initial triangles.
@@ -29,26 +35,97 @@ namespace CGeo
             return new Triangle[] { left, right };
         }
 
-        public static ICollection<Triangle> FindDelaunayTriangulation(IEnumerable<Point> points)
+        /// <summary>
+        /// Computes Delaunay triangulation for set of points.
+        /// </summary>
+        /// <param name="points">Set of points.</param>
+        /// <param name="topLeft">
+        /// Such node, that any other node in input set of points would have greater or equal X & GOE Y components.
+        /// </param>
+        /// <param name="bottomRight">
+        /// Such node, that any other node in input set of points would have lesser or equal X & LOE Y components.
+        /// </param>
+        /// <returns>Delaunay triangulation of input set of points.</returns>
+        /// <remarks>
+        /// Step 1. Create superstructure.
+        /// Step 2. Perform step 2-3 for each node from input.
+        /// Step 2. Add node to triangulation.
+        ///     A) Find triangle in which falls this node (or on rib).
+        ///     B) If node lies in epsilon-neighborhood of any vertex of triangle - ignore this node.
+        ///     C) If node fall on rib, then this rib splits on two new, and each triangle adjacent with this rib
+        ///        also splits in two new.
+        ///     D) If node falls in triangle - split this triangle in three new.
+        /// Step 3. Check Delaunay condition for new triangles and perform required changes.
+        /// </remarks>
+        public static ICollection<Triangle> FindDelaunayTriangulation(IEnumerable<Point> points, 
+            Point topLeft, Point bottomRight)
+        {            
+            // Create superstructure.             
+            ICollection<Triangle> triangulation = CreateSuperstructure(topLeft, bottomRight).ToList();
+            foreach (var node in points)
+            {
+                // Add node to triangulation.
+                var uncheckedTriangles = triangulation.AddNode(node);
+                // Check Delaunay condition for new/modified triangles and perform required changes.
+                while (uncheckedTriangles.Count > 0)
+                {
+                    // Take first element of set.
+                    var triangle = uncheckedTriangles.First();
+                    // Check Delaunay condition for this triangle and perform flip if required.
+                    triangle.CheckAndFlip(uncheckedTriangles);
+                }
+            }
+            return triangulation;
+        }
+
+        /// <summary>
+        /// Check Delaunay condition for this triangle and perform flip if required.
+        /// </summary>
+        /// <param name="triangle">Unchecked on Delaunay condition triangle.</param>
+        /// <param name="uncheckedTriangles">Set of unchecked on Delaunay condition triangles.</param>
+        public static void CheckAndFlip(this Triangle triangle, HashSet<Triangle> uncheckedTriangles)
+        {                        
+            // Triangle that doesn't satisfies Delaunay condition.
+            Triangle T;
+            if (!triangle.FlipRequired(out T))
+            {
+                // Remove taken triangle from set because it satisfies Delaunay condition.
+                uncheckedTriangles.Remove(triangle);
+                return;
+            }
+            // Perform flip.
+            Flip(triangle, T);
+            // If another triangle is not in set - add this triangle.
+            if (!uncheckedTriangles.Contains(T))
+                uncheckedTriangles.Add(T);
+            // Attention! Do not remove taken from set triangle because flip was performed
+            // and we have to check it again.            
+        }
+
+        /// <summary>
+        /// Add node to existing triangulation.
+        /// </summary>
+        /// <returns>Set of new/modified triangles.</returns>
+        public static HashSet<Triangle> AddNode(this ICollection<Triangle> triangulation, Point node)
         {
-            // Step 1. Create superstructure.
-            // Step 2. Perform step 2-3 for each node from input.
-            // Step 2. Add node to triangulation.
-            //     A) Find triangle in which falls this node (or on rib).
-            //     B) If node lies in epsilon-neighborhood of any vertex of triangle - ignore this node.
-            //     C) If node fall on rib, then this rib splits on two new, and each triangle adjacent with this rib
-            //        also splits in two new.
-            //     D) If node falls in triangle - split this triangle in three new.
-            // Step 3. Check Delaunay condition for new triangles and perform required changes.
             throw new NotImplementedException();
         }
 
-        public static void AddNode(this ICollection<Triangle> triangulation, Point node)
+        /// <summary>
+        /// Check this triangle on Delaunay condition. Returns value indicating is flip required or not.
+        /// </summary>
+        /// <param name="T">Checked on Delaunay condition triangle.</param>
+        /// <param name="Flip">Triangle, which violates Delaunay condition.</param>
+        /// <returns>True - if flip required.</returns>
+        public static bool FlipRequired(this Triangle T, out Triangle Flip)
         {
             throw new NotImplementedException();
         }
 
-        public static bool SatisfiesDelaunayCondition(Triangle T, Point node)
+        /// <summary>
+        /// Performs flip of two triangles.
+        /// </summary>
+        public static void Flip(Triangle T1, Triangle T2)
         {
             throw new NotImplementedException();
         }
