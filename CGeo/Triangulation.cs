@@ -124,10 +124,28 @@ namespace CGeo
 
         /// <summary>
         /// Performs flip of two triangles.
+        /// ABC & ABD => ACD & BCD
         /// </summary>
         public static void Flip(Triangle T1, Triangle T2)
         {
-            throw new NotImplementedException();
+            var adjacentRib = T1.GetAdjacentRib(T2);
+            // Vertices of the adjacent rib.
+            Point A = adjacentRib.A;
+            Point B = adjacentRib.B;
+            // Vertices, opposite to adjacent rib.
+            Point C = T1.GetOppositeNode(adjacentRib);
+            Point D = T2.GetOppositeNode(adjacentRib);
+            // Update of links to adjacent triangles required for next ribs:
+            Rib BC = T1.GetRib(B, C);
+            Rib AD = T2.GetRib(A, D);            
+            // New adjacent rib.
+            var CD = new Rib(C, D, T1, T2);
+            // Update links to triangles.
+            BC.Update(T1, T2);
+            AD.Update(T2, T1);
+            // Update triangles' ribs.
+            T1.UpdateRib(adjacentRib, CD);
+            T2.UpdateRib(adjacentRib, CD);
         }
     }
 }
