@@ -24,7 +24,7 @@ namespace CGeo
             } 
         }
 
-        public IEnumerable<Point> Points { get { return Ribs.SelectMany(r => r.Points); } }
+        public IEnumerable<Point> Points { get { return Ribs.SelectMany(r => r.Points).Distinct(); } }
 
         #endregion        
         #region Methods

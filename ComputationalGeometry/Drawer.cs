@@ -30,7 +30,7 @@ namespace ComputationalGeometry
         public static void Draw(this Bitmap bmp, Triangle[] triangles, Color ribColor, Color nodeColor)
         {
             var ribs = triangles.SelectMany(t => t.Ribs).Distinct();
-            var nodes = ribs.SelectMany(r => r.Points).Distinct();
+            var nodes = ribs.SelectMany(r => r.Points);
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 foreach (var rib in ribs)

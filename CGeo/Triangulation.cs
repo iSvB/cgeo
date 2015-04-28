@@ -100,16 +100,17 @@ namespace CGeo
         }
 
         /// <summary>
-        /// Checks Delaunay condtion for triangle <code>T</code> and node <code>node</code>.
-        /// </summary>
-        /// <param name="T">Triangle.</param>
+        /// Checks Delaunay condtion for triangle and node <code>node</code>.
+        /// </summary>        
         /// <param name="node">Adjacent node.</param>
         /// <returns>True - if satisfies, otherwise - false.</returns>
-        internal static bool SatisfiesDelaunayCondition(Triangle T, Point node)
+        internal static bool SatisfiesDelaunayCondition(Point p, Point adjP1, Point adjP2, Point node)
         {
             var v = new Point[4];
             v[0] = node;
-            T.Points.ToArray().CopyTo(v, 1);
+            v[1] = adjP2;
+            v[2] = p;
+            v[3] = adjP1;
             double sa, sb;
             ModifiedCheckOfOppositeAnglesSum(v, out sa, out sb);
             // If sa && sb < 0 => a & b > pi/2 => doesn't satisifes.
@@ -177,14 +178,14 @@ namespace CGeo
              */
             #endregion
 
-            double exp1 = Math.Abs( v[0].X - v[1].X );
-            double exp2 = Math.Abs( v[0].Y - v[3].Y );
-            double exp3 = Math.Abs( v[0].X - v[3].X );
-            double exp4 = Math.Abs( v[0].Y - v[1].Y );
-            double exp5 = Math.Abs( v[2].X - v[1].X );
-            double exp6 = Math.Abs( v[2].X - v[3].X );
-            double exp7 = Math.Abs( v[2].Y - v[1].Y );
-            double exp8 = Math.Abs( v[2].Y - v[3].Y );
+            double exp1 = v[0].X - v[1].X;
+            double exp2 = v[0].Y - v[3].Y;
+            double exp3 = v[0].X - v[3].X;
+            double exp4 = v[0].Y - v[1].Y;
+            double exp5 = v[2].X - v[1].X;
+            double exp6 = v[2].X - v[3].X;
+            double exp7 = v[2].Y - v[1].Y;
+            double exp8 = v[2].Y - v[3].Y;
 
             return (exp1 * exp2 - exp3 * exp4) * sb + sa * (exp5 * exp8 - exp6 * exp7);            
         }
