@@ -89,14 +89,120 @@ namespace CGeo
         }
 
         /// <summary>
-        /// Check this triangle on Delaunay condition. Returns value indicating is flip required or not.
+        /// Check this triangle and adjacent nodes on Delaunay condition. Returns value indicating is flip required or not.
         /// </summary>
         /// <param name="T">Checked on Delaunay condition triangle.</param>
         /// <param name="Flip">Triangle, which violates Delaunay condition.</param>
-        /// <returns>True - if flip required.</returns>
+        /// <returns>True - if flip required, otherwise - false.</returns>
         private static bool FlipRequired(Triangle T, out Triangle Flip)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Checks Delaunay condtion for triangle <code>T</code> and node <code>node</code>.
+        /// </summary>
+        /// <param name="T">Triangle.</param>
+        /// <param name="node">Adjacent node.</param>
+        /// <returns>True - if satisfies, otherwise - false.</returns>
+        internal static bool SatisfiesDelaunayCondition(Triangle T, Point node)
+        {
+            var v = new Point[4];
+            v[0] = node;
+            T.Points.ToArray().CopyTo(v, 1);
+            double sa, sb;
+            ModifiedCheckOfOppositeAnglesSum(v, out sa, out sb);
+            // If sa && sb < 0 => a & b > pi/2 => doesn't satisifes.
+            if (sa < 0 && sb < 0) return false;
+            // If sa && sb >= 0 => a & b < pi/2 => satisfies.
+            if (sa >= 0 && sb >= 0) return true;
+            // If sin(a+b) >= 0 - satisfies, otherwise not.
+            if (OppositeAnglesSum(v, sa, sb) >= 0)
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Performs full check of opposite angles sum.
+        /// </summary>
+        /// <returns>True - if </returns>
+        private static double OppositeAnglesSum(Point[] v, double sa, double sb)
+        {
+            #region Math
+            /*
+             * a + b <= pi    <=>    sin(a + b) >= 0    <=>    sin A * cos B + cos A * sin B >= 0
+             *              
+             * 
+             *                    (x0 - x1) * (x0 - x3) + (y0 - y1) * (y0 - y3)
+             * cos A = ---------------------------------------------------------------------
+             *         sqrt( (x0 - x1)^2 + (y0 - y1)^2 ) * sqrt( (x0 - x3)^2 + (y0 - y3)^2 )
+             * 
+             *                    (x2 - x1) * (x2 - x3) + (y2 - y1) * (y2 - y3)
+             * cos B = ---------------------------------------------------------------------
+             *         sqrt( (x2 - x1)^2 + (y2 - y1)^2 ) * sqrt( (x2 - x3)^2 + (y2 - y3)^2 )
+             *         
+             *                    (x0 - x1) * (y0 - y3) - (x0 - x3) * (y0 - y1)
+             * sin A = ---------------------------------------------------------------------
+             *         sqrt( (x0 - x1)^2 + (y0 - y1)^2 ) * sqrt( (x0 - x3)^2 + (y0 - y3)^2 )
+             *         
+             *                    (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1)
+             * sib B = ---------------------------------------------------------------------
+             *         sqrt( (x2 - x1)^2 + (y2 - y1)^2 ) * sqrt( (x2 - x3)^2 + (y2 - y3)^2 )
+             *                      
+             * 
+             * ( (x0 - x1)*(y0 - y3) - (x0 - x3)*(y0 - y1) ) * ( (x2 - x1)*(x2 - x3) + (y2 - y1)*(y2 - y3) ) +
+             * ( (x0 - x1)*(x0 - x3) + (y0 - y1)*(y0 - y3) ) * ( (x2 - x1)*(y2 - y3) - (x2 - x3)*(y2 - y1) ) >= 0 
+             * 
+             * sa = (x0 - x1) * (x0 - x3)  +  (y0 - y1) * (y0 - y3)
+             * sb = (x2 - x1) * (x2 - x3)  +  (y2 - y1) * (y2 - y3)
+             * 
+             * x0 - x1 = exp1
+             * y0 - y3 = exp2
+             * x0 - x3 = exp3
+             * y0 - y1 = exp4
+             * 
+             * x2 - x1 = exp5
+             * x2 - x3 = exp6
+             * y2 - y1 = exp7
+             * y2 - y3 = exp8
+             * 
+             * ( exp1 * exp2 - exp3 * exp4 ) * ( exp5 * exp6 + exp7 * exp8 ) +
+             * ( exp1 * exp3 + exp4 * exp2 ) * ( exp5 * exp8 - exp6 * exp7 ) >= 0 
+             * 
+             * sa = exp1 * exp3  +  exp4 * exp2
+             * sb = exp5 * exp6  +  exp7 * exp8
+             * 
+             * ( exp1 * exp2 - exp3 * exp4 ) * sb  +  sa * ( exp5 * exp8 - exp6 * exp7 ) >= 0 
+             * 
+             */
+            #endregion
+
+            double exp1 = Math.Abs( v[0].X - v[1].X );
+            double exp2 = Math.Abs( v[0].Y - v[3].Y );
+            double exp3 = Math.Abs( v[0].X - v[3].X );
+            double exp4 = Math.Abs( v[0].Y - v[1].Y );
+            double exp5 = Math.Abs( v[2].X - v[1].X );
+            double exp6 = Math.Abs( v[2].X - v[3].X );
+            double exp7 = Math.Abs( v[2].Y - v[1].Y );
+            double exp8 = Math.Abs( v[2].Y - v[3].Y );
+
+            return (exp1 * exp2 - exp3 * exp4) * sb + sa * (exp5 * exp8 - exp6 * exp7);            
+        }
+
+        /// <summary>
+        /// Performs modified check of opposite angles sum.
+        /// </summary>
+        /// <param name="v">Array of vertices.</param>
+        /// <param name="sa">Coefficient of angle A.</param>
+        /// <param name="sb">Coefficient of angle B.</param>
+        private static void ModifiedCheckOfOppositeAnglesSum(Point[] v, out double sa, out double sb)
+        {            
+            /*
+             * sa = (x0 - x1) * (x0 - x3)  +  (y0 - y1) * (y0 - y3)
+             * sb = (x2 - x1) * (x2 - x3)  +  (y2 - y1) * (y2 - y3)
+             */
+            sa = (v[0].X - v[1].X) * (v[0].X - v[3].X) + (v[0].Y - v[1].Y) * (v[0].Y - v[3].Y);
+            sb = (v[2].X - v[1].X) * (v[2].X - v[3].X) + (v[2].Y - v[1].Y) * (v[2].Y - v[3].Y);
         }
 
         /// <summary>
