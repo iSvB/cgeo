@@ -89,7 +89,8 @@ namespace CGeo
         }
 
         /// <summary>
-        /// Check this triangle and adjacent nodes on Delaunay condition. Returns value indicating is flip required or not.
+        /// Check this triangle and adjacent nodes on Delaunay condition. 
+        /// Returns value indicating is flip required or not.
         /// </summary>
         /// <param name="T">Checked on Delaunay condition triangle.</param>
         /// <param name="Flip">Triangle, which violates Delaunay condition.</param>
@@ -104,21 +105,21 @@ namespace CGeo
         /// </summary>        
         /// <param name="node">Adjacent node.</param>
         /// <returns>True - if satisfies, otherwise - false.</returns>
-        internal static bool SatisfiesDelaunayCondition(Point p, Point adjP1, Point adjP2, Point node)
+        /// <remarks>
+        /// Nodes (p1, p2, p3) - should be in clockwise order.
+        /// Node <code>node</code> - should be opposite to p2 and have adjacent ribs with p1 & p3 
+        /// in rectangle (p1, p2, p3, node).
+        /// </remarks>
+        internal static bool SatisfiesDelaunayCondition(Point p1, Point p2, Point p3, Point node)
         {
-            var v = new Point[4];
-            v[0] = node;
-            v[1] = adjP2;
-            v[2] = p;
-            v[3] = adjP1;
             double sa, sb;
-            ModifiedCheckOfOppositeAnglesSum(v, out sa, out sb);
+            ModifiedCheckOfOppositeAnglesSum(node, p1, p2, p3, out sa, out sb);
             // If sa && sb < 0 => a & b > pi/2 => doesn't satisifes.
             if (sa < 0 && sb < 0) return false;
             // If sa && sb >= 0 => a & b < pi/2 => satisfies.
             if (sa >= 0 && sb >= 0) return true;
             // If sin(a+b) >= 0 - satisfies, otherwise not.
-            if (OppositeAnglesSum(v, sa, sb) >= 0)
+            if (OppositeAnglesSum(node, p1, p2, p3, sa, sb) >= 0)
                 return true;
             return false;
         }
@@ -126,8 +127,15 @@ namespace CGeo
         /// <summary>
         /// Performs full check of opposite angles sum.
         /// </summary>
-        /// <returns>True - if </returns>
-        private static double OppositeAnglesSum(Point[] v, double sa, double sb)
+        /// <returns>
+        /// Sinus of sum of angles (p1,p2,p3) & (p1, p0, p3) multiplied by some constant positive value.
+        /// </returns>
+        /// <remarks>
+        /// Nodes (p1, p2, p3) - should be in clockwise order.
+        /// Node <code>node</code> - should be opposite to p2 and have adjacent ribs with p1 & p3 
+        /// in rectangle (p1, p2, p3, node).
+        /// </remarks>
+        private static double OppositeAnglesSum(Point p0, Point p1, Point p2, Point p3, double sa, double sb)
         {
             #region Math
             /*
@@ -178,32 +186,29 @@ namespace CGeo
              */
             #endregion
 
-            double exp1 = v[0].X - v[1].X;
-            double exp2 = v[0].Y - v[3].Y;
-            double exp3 = v[0].X - v[3].X;
-            double exp4 = v[0].Y - v[1].Y;
-            double exp5 = v[2].X - v[1].X;
-            double exp6 = v[2].X - v[3].X;
-            double exp7 = v[2].Y - v[1].Y;
-            double exp8 = v[2].Y - v[3].Y;
-
-            return (exp1 * exp2 - exp3 * exp4) * sb + sa * (exp5 * exp8 - exp6 * exp7);            
+            return ((p0.X - p1.X) * (p0.Y - p3.Y) - (p0.X - p3.X) * (p0.Y - p1.Y)) * sb + 
+                sa * ((p2.X - p1.X) * (p2.Y - p3.Y) - (p2.X - p3.X) * (p2.Y - p1.Y));
         }
 
         /// <summary>
         /// Performs modified check of opposite angles sum.
         /// </summary>
-        /// <param name="v">Array of vertices.</param>
         /// <param name="sa">Coefficient of angle A.</param>
         /// <param name="sb">Coefficient of angle B.</param>
-        private static void ModifiedCheckOfOppositeAnglesSum(Point[] v, out double sa, out double sb)
+        /// <remarks>
+        /// Nodes (p1, p2, p3) - should be in clockwise order.
+        /// Node <code>node</code> - should be opposite to p2 and have adjacent ribs with p1 & p3 
+        /// in rectangle (p1, p2, p3, node).
+        /// </remarks>
+        private static void ModifiedCheckOfOppositeAnglesSum(Point p0, Point p1, Point p2, Point p3, 
+            out double sa, out double sb)
         {            
             /*
              * sa = (x0 - x1) * (x0 - x3)  +  (y0 - y1) * (y0 - y3)
              * sb = (x2 - x1) * (x2 - x3)  +  (y2 - y1) * (y2 - y3)
              */
-            sa = (v[0].X - v[1].X) * (v[0].X - v[3].X) + (v[0].Y - v[1].Y) * (v[0].Y - v[3].Y);
-            sb = (v[2].X - v[1].X) * (v[2].X - v[3].X) + (v[2].Y - v[1].Y) * (v[2].Y - v[3].Y);
+            sa = (p0.X - p1.X) * (p0.X - p3.X) + (p0.Y - p1.Y) * (p0.Y - p3.Y);
+            sb = (p2.X - p1.X) * (p2.X - p3.X) + (p2.Y - p1.Y) * (p2.Y - p3.Y);
         }
 
         /// <summary>

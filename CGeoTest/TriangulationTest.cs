@@ -112,14 +112,14 @@ namespace CGeoTest
             #region Assert
             
             // Right.
-            Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(A, B, C, D));
-            Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(A, B, C, E));
+            Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(C, A, B, D));
+            Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(C, A, B, E));
             // Bottom.
-            Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(B, C, A, F));
-            Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(B, C, A, G));
+            Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(A, B, C, F));
+            Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(A, B, C, G));
             // Top.
-            Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(C, A, B, H));
-            Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(C, A, B, J));
+            Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(B, C, A, H));
+            Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(B, C, A, J));
 
             #endregion
         }
