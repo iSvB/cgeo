@@ -275,32 +275,78 @@ namespace CGeo
         /// 4) If node falls in triangle - split this triangle in three new.
         /// </remarks>
         private HashSet<Triangle> AddNode(Point node)
-        {                        
+        {
+            var initTriangle = triangles.First();
+            Triangle targetTriangle = FindTriangleBySeparatingRibs(node, initTriangle);
+            // If there are vertex that lies in epsilon-neighborhood of node - then ignore this node.
+            if (targetTriangle.Points.Any(p => p.IsInEpsilonArea(node)))
+                return null;
+            // List of new and modified triangles.
+            var newAndModifiedTriangles = new List<Triangle>() { targetTriangle };
+            // If node fall on rib - rib splits on two new, 
+            // and each triangle adjacent with this rib also splits in 2 new.
+            foreach (var rib in targetTriangle.Ribs)
+                if (Utils.DistanceToLine(rib.A, rib.B, node).IsInEpsilonArea(0))
+                    newAndModifiedTriangles.AddRange(PutPointOnRib(targetTriangle, rib, node));
+            // If in list of triangles only one element then it doesn't falls on rib and then it falls in triangle.            
+            if (newAndModifiedTriangles.Count == 1)
+                newAndModifiedTriangles.AddRange(PutPointInTriangle(targetTriangle, node));                        
+            // Return set of new and modified triangles.
+            return new HashSet<Triangle>(newAndModifiedTriangles);
+        }
+
+        /// <summary>
+        /// Puts node on triangles rib.
+        /// Rib splits on two new, and each triangle adjacent with this rib also splits in two new
+        /// </summary>        
+        /// <returns>New triangles.</returns>
+        private static IEnumerable<Triangle> PutPointOnRib(Triangle T, Rib rib, Point node)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Puts node in triangle.
+        /// Split this triangle in three new.
+        /// </summary>
+        /// <returns>New triangles.</returns>
+        private static IEnumerable<Triangle> PutPointInTriangle(Triangle T, Point node)
+        {
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Find triangle in which falls <code>node</code>.
         /// </summary>        
-        /// <param name="initTriangle">
+        /// <param name="T">
         /// Initial triangle for search algorithm.
         /// Works faster with triangles located closer to node.
         /// </param>
         /// <returns>Triangle in which falls passed node.</returns>
-        private Triangle FindTriangleBySeparatingRibs(Point node, Triangle initTriangle)
-        {            
-            throw new NotImplementedException();
+        private static Triangle FindTriangleBySeparatingRibs(Point node, Triangle T)
+        {
+            Rib separatingRib = GetSeparatingRib(T, node);
+            while (separatingRib != null)
+            {                
+                T = separatingRib.GetAdjacent(T);
+                separatingRib = GetSeparatingRib(T, node);
+            }
+            return T;
         }
 
         /// <summary>
         /// Find rib that separates target node and any vertex of triangle.
         /// </summary>
         /// <returns>
-        /// Rib that separates target node and any vertex of triangle or null if target node located within triangle.
+        /// Rib that separates target node and any vertex of triangle.
+        /// Returns null if target node located within triangle.
         /// </returns>
-        private Rib GetSeparatingRib(Triangle T, Point targetNode)
+        internal static Rib GetSeparatingRib(Triangle T, Point targetNode)
         {
-            throw new NotImplementedException();
+            foreach (var rib in T.Ribs)
+                if (Utils.IsSeparated(rib.A, rib.B, targetNode, T.GetOppositeNode(rib)))
+                    return rib;
+            return null;
         }        
 
         #endregion
@@ -313,6 +359,8 @@ namespace CGeo
         {
             // Add node to triangulation.
             var uncheckedTriangles = AddNode(node);
+            if (uncheckedTriangles == null)
+                return;
             // Check Delaunay condition for new/modified triangles and perform required changes.
             while (uncheckedTriangles.Count > 0)
             {

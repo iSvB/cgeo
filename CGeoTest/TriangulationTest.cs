@@ -180,5 +180,55 @@ namespace CGeoTest
             Assert.IsTrue(tribs);
             Assert.IsTrue(t_dribs);
         }
+
+        [TestMethod]
+        public void GetSeparatingRib()
+        {
+            #region Arrange
+            var A = new Point(0, 0);
+            var B = new Point(1, 2);
+            var C = new Point(2, 0);
+            var D = new Point(3, 1);
+            var E = new Point(0, 1);
+            var F = new Point(1, -1);
+
+            var ABC = new Triangle();
+            var BCD = new Triangle();
+            var ABE = new Triangle();
+            var ACF = new Triangle();
+
+            var AB = new Rib(A, B, ABC, ABE);
+            var BC = new Rib(B, C, ABC, BCD);
+            var AC = new Rib(A, C, ABC, ACF);
+
+            var BD = new Rib(B, D, BCD, null);
+            var CD = new Rib(C, D, BCD, null);
+
+            var AE = new Rib(A, E, ABE, null);
+            var BE = new Rib(B, E, ABE, null);
+
+            var AF = new Rib(A, F, ACF, null);
+            var CF = new Rib(C, F, ACF, null);
+
+            ABC.SetRibs(AB, BC, AC);
+            BCD.SetRibs(BC, BD, CD);
+            ABE.SetRibs(AB, AE, BE);
+            ACF.SetRibs(AC, AF, CF);
+            #endregion
+            // Act.
+            var bc = Triangulation.GetSeparatingRib(ABC, D);
+            var ab = Triangulation.GetSeparatingRib(ABC, E);
+            var ac = Triangulation.GetSeparatingRib(ABC, F);
+            var inv_bc = Triangulation.GetSeparatingRib(BCD, A);
+            var inv_ab = Triangulation.GetSeparatingRib(ABE, C);
+            var inv_ac = Triangulation.GetSeparatingRib(ACF, B);
+            // Assert.
+            Assert.AreSame(BC, bc);
+            Assert.AreSame(BC, inv_bc);
+            Assert.AreSame(AB, ab);
+            Assert.AreSame(AB, inv_ab);
+            Assert.AreSame(AC, ac);
+            Assert.AreSame(AC, inv_ac);
+        }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace CGeo
 {
     public struct Point
-    {
+    {        
         public double X;
 
         public double Y;
@@ -17,6 +17,13 @@ namespace CGeo
         {
             this.X = X;
             this.Y = Y;
+        }
+
+        public bool IsInEpsilonArea(Point p)
+        {
+            if (p.X.IsInEpsilonArea(X) || p.Y.IsInEpsilonArea(Y))
+                return true;
+            return false;
         }
     }
 }

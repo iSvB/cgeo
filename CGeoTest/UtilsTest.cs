@@ -47,5 +47,44 @@ namespace CGeoTest
             Assert.IsFalse(counterClockwiseACB);
             Assert.IsFalse(counterClockwiseCBA);
         }
+
+        [TestMethod]
+        public void IsSeparated()
+        {
+            // Arrange.
+            var A = new Point(1, 2);
+            var B = new Point(5, 3);
+            var C = new Point(4, 1);
+            var D = new Point(-1, 4);
+            var O = new Point(3, 0);
+            var V = new Point(3, 5);
+            // Assert.
+            Assert.IsTrue(Utils.IsSeparated(O, V, A, B));
+            Assert.IsFalse(Utils.IsSeparated(O, V, B, C));
+            Assert.IsFalse(Utils.IsSeparated(O, V, A, D));
+
+            Assert.IsTrue(Utils.IsSeparated(V, O, A, B));
+            Assert.IsFalse(Utils.IsSeparated(V, O, B, C));
+            Assert.IsFalse(Utils.IsSeparated(V, O, A, D));
+
+            Assert.IsTrue(Utils.IsSeparated(V, O, B, A));
+            Assert.IsFalse(Utils.IsSeparated(V, O, C, B));
+            Assert.IsFalse(Utils.IsSeparated(V, O, D, A));
+        }        
+
+        [TestMethod]
+        public void DistanceToLine()
+        {
+            // Arrange.
+            var O = new Point(0, 0);
+            var X = new Point(10, 0);
+            var P1 = new Point(5, 5);
+            var P2 = new Point(-5, -5);
+            var P3 = new Point(15, 0);
+            // Assert.
+            Assert.AreEqual(5, Utils.DistanceToLine(O, X, P1));
+            Assert.AreEqual(5, Utils.DistanceToLine(O, X, P2));
+            Assert.AreEqual(0, Utils.DistanceToLine(O, X, P3));
+        }
     }
 }

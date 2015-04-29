@@ -41,7 +41,13 @@ namespace CGeo
         {
             // Use sign of pseudoscalar vector product - it defines half-plane.
             // If sign of OA ^ OX is same as sign of OA ^ OY - points X & Y lies on same half-plane, otherwise not.
-            throw new NotImplementedException();
+            var OA = new Vector(O, A);
+            var oxSign = Math.Sign(PseudoscalarVectorProduct(OA, new Vector(O, X)));
+            var oySign = Math.Sign(PseudoscalarVectorProduct(OA, new Vector(O, Y)));
+            // If sign is equal to 0 then one of points lies on the line, therefore points are not separeted.
+            if (oxSign == 0 || oySign == 0)
+                return false;
+            return oxSign != oySign;
         }
 
         /// <summary>
@@ -50,7 +56,32 @@ namespace CGeo
         /// <returns>Pseudoscalar vector product.</returns>
         public static double PseudoscalarVectorProduct(Vector a, Vector b)
         {
-            throw new NotImplementedException();
+            return a.X * b.Y - a.Y * b.X;
+        }
+
+        public static bool IsInEpsilonArea(this double x, double y, double epsilon = 10e-6)
+        {
+            if (Math.Abs(x - y) <= epsilon)
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Computes distance from point P to the line OX.
+        /// </summary>
+        /// <returns>Distance from point P to the line OX.</returns>
+        public static double DistanceToLine(Point O, Point X, Point P)
+        {
+            double A, B, C;
+            GetLine(O, X, out A, out B, out C);
+            return Math.Abs((A * P.X + B * P.Y + C) / Math.Sqrt(A * A + B * B));
+        }
+
+        public static void GetLine(Point O, Point X, out double A, out double B, out double C)
+        {
+            A = O.Y - X.Y;
+            B = X.X - O.X;
+            C = O.X * X.Y - X.X * O.Y;
         }
     }
 }
