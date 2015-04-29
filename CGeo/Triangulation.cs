@@ -35,7 +35,7 @@ namespace CGeo
 
         #endregion
         #region Methods
-        #region Private
+        #region Private & internal
 
         /// <summary>
         /// Creates superstructure in defined rectangle.
@@ -179,7 +179,7 @@ namespace CGeo
              *         sqrt( (x0 - x1)^2 + (y0 - y1)^2 ) * sqrt( (x0 - x3)^2 + (y0 - y3)^2 )
              *         
              *                    (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1)
-             * sib B = ---------------------------------------------------------------------
+             * sin B = ---------------------------------------------------------------------
              *         sqrt( (x2 - x1)^2 + (y2 - y1)^2 ) * sqrt( (x2 - x3)^2 + (y2 - y3)^2 )
              *                      
              * 
@@ -275,6 +275,30 @@ namespace CGeo
         /// 4) If node falls in triangle - split this triangle in three new.
         /// </remarks>
         private HashSet<Triangle> AddNode(Point node)
+        {                        
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Find triangle in which falls <code>node</code>.
+        /// </summary>        
+        /// <param name="initTriangle">
+        /// Initial triangle for search algorithm.
+        /// Works faster with triangles located closer to node.
+        /// </param>
+        /// <returns>Triangle in which falls passed node.</returns>
+        private Triangle FindTriangleBySeparatingRibs(Point node, Triangle initTriangle)
+        {            
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Find rib that separates target node and any vertex of triangle.
+        /// </summary>
+        /// <returns>
+        /// Rib that separates target node and any vertex of triangle or null if target node located within triangle.
+        /// </returns>
+        private Rib GetSeparatingRib(Triangle T, Point targetNode)
         {
             throw new NotImplementedException();
         }        

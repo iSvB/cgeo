@@ -30,5 +30,27 @@ namespace CGeo
             var c = CrossProductZ(C, A, C, B);
             return c < 0;
         }
+
+        /// <summary>
+        /// Determines the relative position of points with respect to the line.
+        /// </summary>
+        /// <param name="O">Point that belongs to the line.</param>
+        /// <param name="A">Point that belongs to the line.</param>
+        /// <returns>True if points are separated by line OA.</returns>
+        public static bool IsSeparated(Point O, Point A, Point X, Point Y)
+        {
+            // Use sign of pseudoscalar vector product - it defines half-plane.
+            // If sign of OA ^ OX is same as sign of OA ^ OY - points X & Y lies on same half-plane, otherwise not.
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Computes pseudoscalar vector product.
+        /// </summary>
+        /// <returns>Pseudoscalar vector product.</returns>
+        public static double PseudoscalarVectorProduct(Vector a, Vector b)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
