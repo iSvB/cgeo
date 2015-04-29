@@ -32,6 +32,15 @@ namespace CGeo
                 throw new ArgumentException();
         }
 
+        public Triangle GetAdjacent(Triangle T)
+        {
+            if (T == T1)
+                return T2;
+            if (T == T2)
+                return T1;
+            throw new ArgumentException();
+        }
+
         #endregion
         #region Constructors
 

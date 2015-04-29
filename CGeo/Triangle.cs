@@ -36,7 +36,7 @@ namespace CGeo
 
         public Point GetOppositeNode(Rib rib)
         {
-            return Points.Distinct().Single(p => !rib.Points.Contains(p));
+            return Points.Single(p => !rib.Points.Contains(p));
         }        
 
         public Rib GetAdjacentRib(Triangle T)
@@ -64,7 +64,7 @@ namespace CGeo
         public bool IsAdjacent(Triangle T)
         {
             return Ribs.Any(r => r.Triangles.Contains(T));
-        }
+        }        
 
         #endregion
         #region Constructor

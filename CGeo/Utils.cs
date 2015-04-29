@@ -20,5 +20,15 @@ namespace CGeo
         {
             return (aEnd.X - aStart.X) * (bEnd.Y - bStart.Y) - (aEnd.Y - aStart.Y) * (bEnd.X - bStart.X);
         }
+
+        /// <summary>
+        /// Checks order of points. 
+        /// </summary>
+        /// <returns>True - if points are in clockwise order.</returns>
+        public static bool IsClockwiseOrdered(Point A, Point B, Point C)
+        {
+            var c = CrossProductZ(C, A, C, B);
+            return c < 0;
+        }
     }
 }

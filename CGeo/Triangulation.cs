@@ -95,13 +95,37 @@ namespace CGeo
         /// <param name="T">Checked on Delaunay condition triangle.</param>
         /// <param name="Flip">Triangle, which violates Delaunay condition.</param>
         /// <returns>True - if flip required, otherwise - false.</returns>
-        private static bool FlipRequired(Triangle T, out Triangle Flip)
+        internal static bool FlipRequired(Triangle T, out Triangle Flip)
         {
-            throw new NotImplementedException();
+            Flip = null;
+            foreach (var rib in T.Ribs)
+            {
+                // Get adjacent by rib triangle.
+                Flip = rib.GetAdjacent(T);
+                // If there are no adjacent by this rib triangle - go to next rib.
+                if (Flip == null)
+                    continue;
+                var node = Flip.GetOppositeNode(rib);
+                var p1 = rib.A;
+                var p2 = T.GetOppositeNode(rib);                
+                var p3 = rib.B;
+                // Vertices should be in clockwise order.
+                if (!Utils.IsClockwiseOrdered(p1, p2, p3))
+                {
+                    // Swap vertices p1 & p3 to sort them in clockwise order.
+                    var buf = p1;
+                    p1 = p3;
+                    p3 = buf;
+                }
+                // If triangle and node doesn't satisfy Delaunay condition - flip required;
+                if (!SatisfiesDelaunayCondition(p1, p2, p3, node))
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
-        /// Checks Delaunay condtion for triangle and node <code>node</code>.
+        /// Checks Delaunay condition for triangle and node <code>node</code>.
         /// </summary>        
         /// <param name="node">Adjacent node.</param>
         /// <returns>True - if satisfies, otherwise - false.</returns>
@@ -114,7 +138,7 @@ namespace CGeo
         {
             double sa, sb;
             ModifiedCheckOfOppositeAnglesSum(node, p1, p2, p3, out sa, out sb);
-            // If sa && sb < 0 => a & b > pi/2 => doesn't satisifes.
+            // If sa && sb < 0 => a & b > pi/2 => doesn't satisfies.
             if (sa < 0 && sb < 0) return false;
             // If sa && sb >= 0 => a & b < pi/2 => satisfies.
             if (sa >= 0 && sb >= 0) return true;
@@ -235,6 +259,8 @@ namespace CGeo
             // Update triangles' ribs.
             T1.UpdateRib(adjacentRib, CD);
             T2.UpdateRib(adjacentRib, CD);
+            T1.UpdateRib(BC, AD);
+            T2.UpdateRib(AD, BC);
         }
 
         /// <summary>

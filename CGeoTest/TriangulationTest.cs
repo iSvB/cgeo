@@ -6,7 +6,40 @@ namespace CGeoTest
 {
     [TestClass]
     public class TriangulationTest
-    {        
+    {
+        #region Fields
+
+        Point A, B, C, D, E, F, G, H, J;
+        Triangle T;
+        Rib AB, BC, AC;
+
+        #endregion
+
+        private void Initialize()
+        {
+            // Nodes
+            // Main triangle.
+            A = new Point(0, 37);
+            B = new Point(57, 64);
+            C = new Point(60, 8);
+            // Right nodes.            
+            D = new Point(67, 38);
+            E = new Point(119, 39);
+            // Bottom nodes.
+            F = new Point(27, 12);
+            G = new Point(10, -10);
+            // Top nodes.
+            H = new Point(22, 61);
+            J = new Point(19, 89);
+
+            T = new Triangle();
+            // Ribs.
+            AB = new Rib(A, B, T, null);
+            BC = new Rib(B, C, T, null);
+            AC = new Rib(A, C, T, null);
+            T.SetRibs(AB, BC, AC);
+        }
+
         [TestMethod]
         public void Flip()
         {
@@ -85,32 +118,9 @@ namespace CGeoTest
         [TestMethod]
         public void DelaunayCondition()
         {
-            #region Arrange
-            // Nodes
-            // Main triangle.
-            var A = new Point(0, 37);
-            var B = new Point(57, 64);
-            var C = new Point(60, 8);
-            // Right nodes.            
-            var D = new Point(67, 38);  // Violates             
-            var E = new Point(119, 39); // Satisfy
-            // Bottom nodes.
-            var F = new Point(27, 12);  // Violates             
-            var G = new Point(10, -10); // Satisfy
-            // Top nodes.
-            var H = new Point(22, 61);  // Violates             
-            var J = new Point(19, 89);  // Satisfy
-            
-            var T = new Triangle();
-            // Ribs.
-            var AB = new Rib(A, B, T, null);
-            var BC = new Rib(B, C, T, null);
-            var AC = new Rib(A, C, T, null);
-            T.SetRibs(AB, BC, AC);
-
-            #endregion
-            #region Assert
-            
+            // Arrange.
+            Initialize();
+            // Assert.            
             // Right.
             Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(C, A, B, D));
             Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(C, A, B, E));
@@ -120,8 +130,26 @@ namespace CGeoTest
             // Top.
             Assert.IsFalse(Triangulation.SatisfiesDelaunayCondition(B, C, A, H));
             Assert.IsTrue(Triangulation.SatisfiesDelaunayCondition(B, C, A, J));
+        }
 
-            #endregion
+        [TestMethod]
+        public void FlipRequired()
+        {
+            // Arrange.
+            Initialize();                        
+            var T_D = new Triangle();            
+            var BD = new Rib(B, D, T_D, null);
+            var CD = new Rib(C, D, T_D, null);
+            T_D.SetRibs(BC, BD, CD);
+            BC.Update(null, T_D);         
+            // Act.
+            Triangle outFlip;
+            var isRequiredBefore = Triangulation.FlipRequired(T, out outFlip);
+            Triangulation.Flip(T, T_D);
+            var isRequiredAfter = Triangulation.FlipRequired(T, out outFlip);
+            // Assert.            
+            Assert.IsTrue(isRequiredBefore);
+            Assert.IsFalse(isRequiredAfter);
         }
     }
 }
