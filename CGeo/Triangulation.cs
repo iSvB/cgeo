@@ -69,7 +69,7 @@ namespace CGeo
         /// </summary>
         /// <param name="triangle">Unchecked on Delaunay condition triangle.</param>
         /// <param name="uncheckedTriangles">Set of unchecked on Delaunay condition triangles.</param>
-        private static void CheckAndFlip(Triangle triangle, HashSet<Triangle> uncheckedTriangles)
+        internal static void CheckAndFlip(Triangle triangle, HashSet<Triangle> uncheckedTriangles)
         {
             // Triangle that doesn't satisfies Delaunay condition.
             Triangle T;

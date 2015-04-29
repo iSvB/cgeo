@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CGeo;
 
@@ -10,8 +11,9 @@ namespace CGeoTest
         #region Fields
 
         Point A, B, C, D, E, F, G, H, J;
-        Triangle T;
+        Triangle T, T_D;
         Rib AB, BC, AC;
+        Rib BD, CD;
 
         #endregion
 
@@ -38,6 +40,15 @@ namespace CGeoTest
             BC = new Rib(B, C, T, null);
             AC = new Rib(A, C, T, null);
             T.SetRibs(AB, BC, AC);
+        }
+
+        private void CreateT_D()
+        {
+            T_D = new Triangle();
+            BD = new Rib(B, D, T_D, null);
+            CD = new Rib(C, D, T_D, null);
+            T_D.SetRibs(BC, BD, CD);
+            BC.Update(null, T_D);         
         }
 
         [TestMethod]
@@ -136,12 +147,8 @@ namespace CGeoTest
         public void FlipRequired()
         {
             // Arrange.
-            Initialize();                        
-            var T_D = new Triangle();            
-            var BD = new Rib(B, D, T_D, null);
-            var CD = new Rib(C, D, T_D, null);
-            T_D.SetRibs(BC, BD, CD);
-            BC.Update(null, T_D);         
+            Initialize();
+            CreateT_D();
             // Act.
             Triangle outFlip;
             var isRequiredBefore = Triangulation.FlipRequired(T, out outFlip);
@@ -150,6 +157,28 @@ namespace CGeoTest
             // Assert.            
             Assert.IsTrue(isRequiredBefore);
             Assert.IsFalse(isRequiredAfter);
+        }
+
+        [TestMethod]
+        public void CheckAndFlip()
+        {
+            // Arrange.
+            Initialize();
+            CreateT_D();
+            // Act.
+            Triangulation.CheckAndFlip(T, new System.Collections.Generic.HashSet<Triangle>());
+            // Assert.            
+            var tribs = T.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(B));
+            tribs &= T.Ribs.Any(r => r.Points.Contains(B) && r.Points.Contains(D));
+            tribs &= T.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(D));
+            tribs &= T.Points.Count() == 3;
+            var t_dribs = T_D.Ribs.Any(r => r.Points.Contains(C) && r.Points.Contains(D));
+            t_dribs &= T_D.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(C));
+            t_dribs &= T_D.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(D));
+            t_dribs &= T_D.Points.Count() == 3;
+
+            Assert.IsTrue(tribs);
+            Assert.IsTrue(t_dribs);
         }
     }
 }
