@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 namespace CGeo
 {
     /// <summary>
-    /// Computes Delaunay triangulation.        
+    /// Represents Delaunay triangulation.        
     /// </summary>
     /// <remarks>
     /// Algorithm:
@@ -282,15 +282,15 @@ namespace CGeo
             if (targetTriangle.Points.Any(p => p.IsInEpsilonArea(node)))
                 return null;
             // List of new and modified triangles.
-            var newAndModifiedTriangles = new List<Triangle>() { targetTriangle };
+            IEnumerable<Triangle> newAndModifiedTriangles = null;
             // If node fall on rib - rib splits on two new, 
             // and each triangle adjacent with this rib also splits in 2 new.
             foreach (var rib in targetTriangle.Ribs)
                 if (Utils.DistanceToLine(rib.A, rib.B, node).IsInEpsilonArea(0))
-                    newAndModifiedTriangles.AddRange(PutPointOnRib(targetTriangle, rib, node));
-            // If in list of triangles only one element then it doesn't falls on rib and then it falls in triangle.            
-            if (newAndModifiedTriangles.Count == 1)
-                newAndModifiedTriangles.AddRange(PutPointInTriangle(targetTriangle, node));                        
+                    newAndModifiedTriangles = PutPointOnRib(rib, node);
+            // If list of triangles is null then it doesn't falls on rib and then it falls in triangle.            
+            if (newAndModifiedTriangles == null)
+                newAndModifiedTriangles = PutPointInTriangle(targetTriangle, node);
             // Return set of new and modified triangles.
             return new HashSet<Triangle>(newAndModifiedTriangles);
         }
@@ -299,10 +299,91 @@ namespace CGeo
         /// Puts node on triangles rib.
         /// Rib splits on two new, and each triangle adjacent with this rib also splits in two new
         /// </summary>        
-        /// <returns>New triangles.</returns>
-        private static IEnumerable<Triangle> PutPointOnRib(Triangle T, Rib rib, Point node)
+        /// <returns>New and modified triangles.</returns>
+        private IEnumerable<Triangle> PutPointOnRib(Rib rib, Point node)
         {
-            throw new NotImplementedException();
+            IEnumerable<Triangle> newTriangles = null;
+            IEnumerable<Triangle> modifiedTriangles = null;
+            
+            if (rib.Triangles.Contains(null))
+                modifiedTriangles = PutPointOnOutsideRib(rib, node, out newTriangles);
+            else
+                modifiedTriangles = PutPointOnInnerRib(rib, node, out newTriangles);
+            // Add new triangles to triangulation.
+            foreach (var t in newTriangles)
+                triangles.Add(t);
+            // Return new and modified triangles.
+            return newTriangles.Union(modifiedTriangles);
+        }
+
+        /// <summary>
+        /// Put node on rib that lies on the bounds of superstructure.
+        /// </summary>
+        /// <param name="newTriangles">Collection of new triangles.</param>
+        /// <returns>Modified triangles.</returns>
+        private static IEnumerable<Triangle> PutPointOnOutsideRib(Rib rib, Point node, 
+            out IEnumerable<Triangle> newTriangles)
+        {
+            // Triangles.
+            var T = rib.Triangles.Single(t => t != null);
+            var NT = new Triangle();
+            // Vertices of rib.
+            var A = rib.A;
+            var B = rib.B;
+            // Third vertex of left triangle.
+            var C = T.GetOppositeNode(rib);
+            // Ribs that requires update.
+            var BC = T.GetOppositeRib(A);
+            // New ribs.
+            var OC = new Rib(node, C, T, NT);
+            var OB = new Rib(node, B, NT, null);
+            // Update ribs links.
+            BC.Update(T, NT);
+            // Change vertex B of old adjacent rib to passed node.
+            rib.B = node;
+            // Set newTriangles out parameter.
+            newTriangles = new Triangle[] { NT };
+            // Return modified triangles.
+            return new Triangle[] { T };
+        }
+
+        /// <summary>
+        /// Put node on rib that located somewhere in the bounds of superstructure 
+        /// and it has adjacent triangles from both sides.
+        /// </summary>
+        /// <param name="newTriangles">Collection of new triangles.</param>
+        /// <returns>Modified triangles.</returns>
+        private static IEnumerable<Triangle> PutPointOnInnerRib(Rib rib, Point node, 
+            out IEnumerable<Triangle> newTriangles)
+        {
+            // Triangles.
+            var LT = rib.T1;
+            var RT = rib.T2;
+            var NLT = new Triangle();
+            var NRT = new Triangle();
+            // Vertices of rib.
+            var A = rib.A;
+            var B = rib.B;
+            // Third vertex of left triangle.
+            var C = LT.GetOppositeNode(rib);
+            // Third vertex of right triangle.
+            var D = RT.GetOppositeNode(rib);
+            // Ribs that requires update.
+            var BC = LT.GetOppositeRib(A);
+            var BD = RT.GetOppositeRib(A);
+            // New ribs.
+            var OC = new Rib(node, C, LT, NLT);
+            var OD = new Rib(node, D, RT, NRT);
+            var OB = new Rib(node, B, NLT, NRT);
+            // Update ribs links.
+            BC.Update(LT, NLT);
+            BD.Update(RT, NRT);
+            // Change vertex B of old adjacent rib to passed node.
+            rib.B = node;
+            // Set newTriangles out parameter.
+            newTriangles = new Triangle[] { NLT, NRT };
+            // Return modified triangles.
+            return new Triangle[] { LT, RT };
         }
 
         /// <summary>

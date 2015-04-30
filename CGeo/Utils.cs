@@ -44,7 +44,7 @@ namespace CGeo
             var OA = new Vector(O, A);
             var oxSign = Math.Sign(PseudoscalarVectorProduct(OA, new Vector(O, X)));
             var oySign = Math.Sign(PseudoscalarVectorProduct(OA, new Vector(O, Y)));
-            // If sign is equal to 0 then one of points lies on the line, therefore points are not separeted.
+            // If sign is equal to 0 then one of points lies on the line, therefore points are not separated.
             if (oxSign == 0 || oySign == 0)
                 return false;
             return oxSign != oySign;
@@ -56,9 +56,13 @@ namespace CGeo
         /// <returns>Pseudoscalar vector product.</returns>
         public static double PseudoscalarVectorProduct(Vector a, Vector b)
         {
-            return a.X * b.Y - a.Y * b.X;
+            return a.X * b.Y - a.Y * b.X; 
         }
 
+        /// <summary>
+        /// Determines whether y lies in epsilon-neighborhood of x.
+        /// </summary>
+        /// <returns>True - if y lies in epsilon-neighborhood of x, otherwise - false.</returns>
         public static bool IsInEpsilonArea(this double x, double y, double epsilon = 10e-6)
         {
             if (Math.Abs(x - y) <= epsilon)
@@ -77,6 +81,11 @@ namespace CGeo
             return Math.Abs((A * P.X + B * P.Y + C) / Math.Sqrt(A * A + B * B));
         }
 
+        /// <summary>
+        /// Computes constants of the general equation of the line.
+        /// </summary>
+        /// <param name="O">Point on line.</param>
+        /// <param name="X">Point on line.</param>
         public static void GetLine(Point O, Point X, out double A, out double B, out double C)
         {
             A = O.Y - X.Y;
