@@ -21,7 +21,7 @@ namespace CGeo
 
         public bool IsInEpsilonArea(Point p)
         {
-            if (p.X.IsInEpsilonArea(X) || p.Y.IsInEpsilonArea(Y))
+            if (p.X.IsInEpsilonArea(X) && p.Y.IsInEpsilonArea(Y))
                 return true;
             return false;
         }

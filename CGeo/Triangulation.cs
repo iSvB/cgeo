@@ -99,7 +99,10 @@ namespace CGeo
             // and each triangle adjacent with this rib also splits in 2 new.
             foreach (var rib in targetTriangle.Ribs)
                 if (Utils.DistanceToLine(rib.A, rib.B, node).IsInEpsilonArea(0))
+                {
                     newAndModifiedTriangles = PutPointOnRib(rib, node);
+                    break;
+                }
             // If list of triangles is null then it doesn't falls on rib and then it falls in triangle.            
             if (newAndModifiedTriangles == null)
                 newAndModifiedTriangles = PutPointInTriangle(targetTriangle, node);
@@ -151,6 +154,10 @@ namespace CGeo
             var OB = new Rib(node, B, NT, null);
             // Update ribs links.
             BC.Update(T, NT);
+            // Set ribs to new triangle.
+            NT.SetRibs(OC, OB, BC);
+            // Update rib of existing triangle.
+            T.UpdateRib(BC, OC);
             // Change vertex B of old adjacent rib to passed node.
             rib.B = node;
             // Set newTriangles out parameter.
@@ -190,6 +197,12 @@ namespace CGeo
             // Update ribs links.
             BC.Update(LT, NLT);
             BD.Update(RT, NRT);
+            // Set ribs to new triangles.
+            NLT.SetRibs(OC, OB, BC);
+            NRT.SetRibs(OD, OB, BD);
+            // Update ribs of existing triangles.
+            LT.UpdateRib(BC, OC);
+            RT.UpdateRib(BD, OD);
             // Change vertex B of old adjacent rib to passed node.
             rib.B = node;
             // Set newTriangles out parameter.
@@ -387,6 +400,8 @@ namespace CGeo
             Flip = null;
             foreach (var rib in T.Ribs)
             {
+                if (rib == null)
+                    continue;
                 // Get adjacent by rib triangle.
                 Flip = rib.GetAdjacent(T);
                 // If there are no adjacent by this rib triangle - go to next rib.
@@ -497,6 +512,8 @@ namespace CGeo
         /// </summary>
         public void Add(IEnumerable<Point> nodes)
         {
+            if (nodes == null)
+                return;
             foreach (var node in nodes)
                 Add(node);
         }

@@ -27,7 +27,7 @@ namespace ComputationalGeometry
             }
         }
 
-        public static void Draw(this Bitmap bmp, Triangle[] triangles, Color ribColor, Color nodeColor)
+        public static void Draw(this Bitmap bmp, IEnumerable<Triangle> triangles, Color ribColor, Color nodeColor)
         {
             var ribs = triangles.SelectMany(t => t.Ribs).Distinct();
             var nodes = ribs.SelectMany(r => r.Points);

@@ -49,6 +49,19 @@ namespace CGeoTest
         }
 
         [TestMethod]
+        public void ClockwiseOrder2()
+        {
+            // Arrange.
+            var A = new Point(50, 50);
+            var B = new Point(130, 150);
+            var C = new Point(250, 250);
+            // Act.
+            var isClockwise = Utils.IsClockwiseOrdered(A, B, C);
+            // Assert.
+            Assert.IsFalse(isClockwise);            
+        }
+
+        [TestMethod]
         public void IsSeparated()
         {
             // Arrange.

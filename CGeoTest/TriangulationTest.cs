@@ -144,6 +144,28 @@ namespace CGeoTest
         }
 
         [TestMethod]
+        public void DelaunayCondition2()
+        {
+            // Arrange.            
+            var A = new Point(50, 50);
+            var B = new Point(130, 150);
+            var C = new Point(250, 250);
+            var D = new Point(250, 50);
+
+            var T = new Triangle();
+
+            var AB = new Rib(A, B, T, null);
+            var BC = new Rib(B, C, T, null);
+            var AC = new Rib(A, C, T, null);
+
+            T.SetRibs(AB, BC, AC);
+            // Act.
+            var notSatisfies = Triangulation.SatisfiesDelaunayCondition(C, B, A, D);
+            // Assert.
+            Assert.IsFalse(notSatisfies);
+        }
+
+        [TestMethod]
         public void FlipRequired()
         {
             // Arrange.
