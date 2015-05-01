@@ -50,9 +50,9 @@ namespace CGeo
         {
             Rib separatingRib = GetSeparatingRib(T, node);
             while (separatingRib != null)
-            {
+            {                
                 T = separatingRib.GetAdjacent(T);
-                separatingRib = GetSeparatingRib(T, node);
+                separatingRib = GetSeparatingRib(T, node);        
             }
             return T;
         }
@@ -73,7 +73,7 @@ namespace CGeo
         }
 
         #endregion
-        #region Add node
+        #region Add node        
 
         /// <summary>
         /// Add node to triangulation.
@@ -87,7 +87,7 @@ namespace CGeo
         /// 4) If node falls in triangle - split this triangle in three new.
         /// </remarks>
         private HashSet<Triangle> AddNode(Point node)
-        {
+        {            
             var initTriangle = triangles.First();
             Triangle targetTriangle = FindTriangleBySeparatingRibs(node, initTriangle);
             // If there are vertex that lies in epsilon-neighborhood of node - then ignore this node.
@@ -339,8 +339,8 @@ namespace CGeo
              */
             #endregion
 
-            return ((p0.X - p1.X) * (p0.Y - p3.Y) - (p0.X - p3.X) * (p0.Y - p1.Y)) * sb +
-                sa * ((p2.X - p1.X) * (p2.Y - p3.Y) - (p2.X - p3.X) * (p2.Y - p1.Y));
+            return Math.Abs( ((p0.X - p1.X) * (p0.Y - p3.Y) - (p0.X - p3.X) * (p0.Y - p1.Y)) )* sb +
+                sa * Math.Abs( ((p2.X - p1.X) * (p2.Y - p3.Y) - (p2.X - p3.X) * (p2.Y - p1.Y)) );
         }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace CGeo
             }
             // Perform flip.
             Flip(triangle, T);
-            // If another triangle is not in set - add this triangle.
+            // If another triangle is not in set - add this triangle.            
             if (!uncheckedTriangles.Contains(T))
                 uncheckedTriangles.Add(T);
             // Attention! Do not remove taken from set triangle because flip was performed
@@ -411,14 +411,6 @@ namespace CGeo
                 var p1 = rib.A;
                 var p2 = T.GetOppositeNode(rib);
                 var p3 = rib.B;
-                // Vertices should be in clockwise order.
-                if (!Utils.IsClockwiseOrdered(p1, p2, p3))
-                {
-                    // Swap vertices p1 & p3 to sort them in clockwise order.
-                    var buf = p1;
-                    p1 = p3;
-                    p3 = buf;
-                }
                 // If triangle and node doesn't satisfy Delaunay condition - flip required;
                 if (!SatisfiesDelaunayCondition(p1, p2, p3, node))
                     return true;

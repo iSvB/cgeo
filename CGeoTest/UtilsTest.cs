@@ -58,7 +58,7 @@ namespace CGeoTest
             // Act.
             var isClockwise = Utils.IsClockwiseOrdered(A, B, C);
             // Assert.
-            Assert.IsFalse(isClockwise);            
+            Assert.IsTrue(isClockwise);            
         }
 
         [TestMethod]

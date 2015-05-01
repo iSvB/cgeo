@@ -25,7 +25,7 @@ namespace CGeoTest
             B = new Point(57, 64);
             C = new Point(60, 8);
             // Right nodes.            
-            D = new Point(67, 38);
+            D = new Point(62, 38);
             E = new Point(119, 39);
             // Bottom nodes.
             F = new Point(27, 12);
@@ -147,22 +147,14 @@ namespace CGeoTest
         public void DelaunayCondition2()
         {
             // Arrange.            
-            var A = new Point(50, 50);
-            var B = new Point(130, 150);
-            var C = new Point(250, 250);
-            var D = new Point(250, 50);
-
-            var T = new Triangle();
-
-            var AB = new Rib(A, B, T, null);
-            var BC = new Rib(B, C, T, null);
-            var AC = new Rib(A, C, T, null);
-
-            T.SetRibs(AB, BC, AC);
+            var A = new Point(5, 5);
+            var B = new Point(13, 15);
+            var C = new Point(25, 25);
+            var D = new Point(25, 5);
             // Act.
-            var notSatisfies = Triangulation.SatisfiesDelaunayCondition(C, B, A, D);
+            var isSatisfies = Triangulation.SatisfiesDelaunayCondition(A, B, C, D);
             // Assert.
-            Assert.IsFalse(notSatisfies);
+            Assert.IsFalse(isSatisfies);
         }
 
         [TestMethod]
@@ -237,7 +229,7 @@ namespace CGeoTest
             ABE.SetRibs(AB, AE, BE);
             ACF.SetRibs(AC, AF, CF);
             #endregion
-            // Act.
+            //Act.
             var bc = Triangulation.GetSeparatingRib(ABC, D);
             var ab = Triangulation.GetSeparatingRib(ABC, E);
             var ac = Triangulation.GetSeparatingRib(ABC, F);

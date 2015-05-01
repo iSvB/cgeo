@@ -34,23 +34,28 @@ namespace ComputationalGeometry
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 foreach (var rib in ribs)
-                    g.Draw(rib, ribColor);
+                    g.Draw(rib, ribColor, bmp.Height);
                 foreach (var node in nodes)
-                    bmp.Draw(node, nodeColor);
+                    bmp.Draw(node, nodeColor, bmp.Height);
             }
         }
 
-        public static void Draw(this Graphics g, Rib rib, Color color)
+        public static void Draw(this Graphics g, Rib rib, Color color, int invertAxis)
         {
-            var A = new System.Drawing.PointF((float)rib.A.X, (float)rib.A.Y);
-            var B = new System.Drawing.PointF((float)rib.B.X, (float)rib.B.Y);
+            var A = new System.Drawing.PointF((float)rib.A.X, (float)InvertY(rib.A.Y, invertAxis));
+            var B = new System.Drawing.PointF((float)rib.B.X, (float)InvertY(rib.B.Y, invertAxis));
             var pen = new Pen(color, 1);
             g.DrawLine(pen, A, B);
         }
 
-        public static void Draw(this Bitmap bmp, CGeo.Point point, Color color)
+        public static void Draw(this Bitmap bmp, CGeo.Point point, Color color, int invertAxis)
         {
-            bmp.SetPixel((int)Math.Floor(point.X), (int)Math.Floor(point.Y), color);
+            bmp.SetPixel((int)Math.Floor(point.X), (int)Math.Floor(InvertY(point.Y, invertAxis)), color);
+        }
+
+        private static double InvertY(double Y, double invertAxis)
+        {
+            return invertAxis - Y;
         }
     }
 }
