@@ -32,6 +32,7 @@ namespace CGeo
         /// Set of triangles that represent Delaunay triangulation.
         /// </summary>
         private ICollection<Triangle> triangles;
+        private DynamicCache cache;
 
         #endregion
         #region Methods
@@ -73,7 +74,7 @@ namespace CGeo
         }
 
         #endregion
-        #region Add node        
+        #region Add node
 
         /// <summary>
         /// Add node to triangulation.
@@ -88,24 +89,30 @@ namespace CGeo
         /// </remarks>
         private HashSet<Triangle> AddNode(Point node)
         {            
-            var initTriangle = triangles.First();
+            var initTriangle = cache.Get(node);
             Triangle targetTriangle = FindTriangleBySeparatingRibs(node, initTriangle);
             // If there are vertex that lies in epsilon-neighborhood of node - then ignore this node.
             if (targetTriangle.Points.Any(p => p.IsInEpsilonArea(node)))
                 return null;
             // List of new and modified triangles.
             IEnumerable<Triangle> newAndModifiedTriangles = null;
+            IEnumerable<Triangle> newTriangles = null;
             // If node fall on rib - rib splits on two new, 
             // and each triangle adjacent with this rib also splits in 2 new.
             foreach (var rib in targetTriangle.Ribs)
                 if (Utils.DistanceToLine(rib.A, rib.B, node).IsInEpsilonArea(0))
                 {
-                    newAndModifiedTriangles = PutPointOnRib(rib, node);
+                    newAndModifiedTriangles = PutPointOnRib(rib, node, out newTriangles);
                     break;
                 }
             // If list of triangles is null then it doesn't falls on rib and then it falls in triangle.            
             if (newAndModifiedTriangles == null)
-                newAndModifiedTriangles = PutPointInTriangle(targetTriangle, node);
+                newAndModifiedTriangles = PutPointInTriangle(targetTriangle, node, out newTriangles);
+            // Increase cache's counter of nodes.
+            cache.IncrementNodeCount();
+            // Add new triangles to cache.
+            foreach (var T in newTriangles)
+                cache.Update(T);
             // Return set of new and modified triangles.
             return new HashSet<Triangle>(newAndModifiedTriangles);
         }
@@ -115,9 +122,9 @@ namespace CGeo
         /// Rib splits on two new, and each triangle adjacent with this rib also splits in two new
         /// </summary>        
         /// <returns>New and modified triangles.</returns>
-        private IEnumerable<Triangle> PutPointOnRib(Rib rib, Point node)
+        private IEnumerable<Triangle> PutPointOnRib(Rib rib, Point node, out IEnumerable<Triangle> newTriangles)
         {
-            IEnumerable<Triangle> newTriangles = null;
+            newTriangles = null;
             IEnumerable<Triangle> modifiedTriangles = null;
 
             if (rib.Triangles.Contains(null))
@@ -216,7 +223,8 @@ namespace CGeo
         /// Split this triangle in three new.
         /// </summary>
         /// <returns>New and modified triangles.</returns>
-        private IEnumerable<Triangle> PutPointInTriangle(Triangle T, Point node)
+        private IEnumerable<Triangle> PutPointInTriangle(Triangle T, Point node, 
+            out IEnumerable<Triangle> newTriangles)
         {   
             // Vertices.
             // node == O
@@ -226,6 +234,8 @@ namespace CGeo
             // Triangles.
             var LT = new Triangle();
             var RT = new Triangle();
+            // Set new triangles.
+            newTriangles = new Triangle[] { LT, RT };
             // Ribs.
             var AB = T.GetRib(A, B);
             var BC = T.GetRib(B, C);
@@ -455,7 +465,7 @@ namespace CGeo
         /// <param name="topLeft">Top left vertex of rectangle.</param>
         /// <param name="bottomRight">Bottom right vertex of rectangle.</param>
         /// <returns>Superstructure represented as set of triangles.</returns>
-        private static IEnumerable<Triangle> CreateSuperstructure(Point topLeft, Point bottomRight)
+        private IEnumerable<Triangle> CreateSuperstructure(Point topLeft, Point bottomRight)
         {
             // Initial triangles.
             var left = new Triangle();
@@ -472,6 +482,8 @@ namespace CGeo
             // Set ribs for triangles.
             left.SetRibs(leftRib, bottomRib, diagonal);
             right.SetRibs(rightRib, topRib, diagonal);
+            // Add triangles to cache.
+            cache.Initialize(left, right, left, right);
             // Return superstructure.
             return new Triangle[] { left, right };
         }                                
@@ -526,6 +538,7 @@ namespace CGeo
         /// <param name="nodes">Nodes of triangulation.</param>
         public Triangulation(Point topLeft, Point bottomRight, IEnumerable<Point> nodes = null) 
         {
+            cache = new DynamicCache(6, topLeft.X, bottomRight.X, topLeft.Y, bottomRight.Y);
             triangles = CreateSuperstructure(topLeft, bottomRight).ToList();
             // If we don't add any nodes then superstructure might not satisfy Delaunay condition 
             // therefore we should check it.            
