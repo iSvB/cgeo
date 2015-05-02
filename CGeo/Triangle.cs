@@ -8,12 +8,6 @@ namespace CGeo
 {
     public class Triangle
     {
-        #region Fields
-
-        private Dictionary<Rib, Point> oppositeNodes = new Dictionary<Rib, Point>(3);
-        private Dictionary<Point, Rib> oppositeRibs = new Dictionary<Point, Rib>(3);        
-
-        #endregion
         #region Properties
 
         public Rib[] Ribs { get; } = new Rib[3];        
@@ -25,17 +19,31 @@ namespace CGeo
 
         public Rib GetOppositeRib(Point vertex)
         {
-            Rib result;
-            if (oppositeRibs.TryGetValue(vertex, out result))
-                return result;
+            int i = 0;
+            for (; i < 3; ++i)
+                if (Points[i].Equals(vertex))
+                    break;
+            switch (i)
+            {
+                case 0: return Ribs[1];
+                case 1: return Ribs[2];
+                case 2: return Ribs[0];
+            }
             throw new ArgumentException();
         }
 
         public Point GetOppositeNode(Rib rib)
         {
-            Point result;
-            if (oppositeNodes.TryGetValue(rib, out result))
-                return result;
+            int i = 0;
+            for (; i < 3; ++i)
+                if (Ribs[i] == rib)
+                    break;
+            switch (i)
+            {
+                case 0: return Points[2];
+                case 1: return Points[0];
+                case 2: return Points[1];
+            }
             throw new ArgumentException();
         }        
 
@@ -78,21 +86,40 @@ namespace CGeo
         }
 
         public unsafe void Update()
-        {            
+        {
+            Rib a = Ribs[0];
+            Rib b = null;
+            Rib c = null;
             #region Nodes
-            var A = Ribs[0].A;
-            var B = Ribs[0].B;
+            var A = a.A;
+            var B = a.B;
             Point C = new Point();
             for (var i = 1; i < 3; ++i)
                 foreach (var node in Ribs[i].Points)
                     if (!node.Equals(A) && !node.Equals(B))
                     {
                         C = node;
+                        if (Ribs[i].A.Equals(A) || Ribs[i].B.Equals(A))
+                        {
+                            c = Ribs[i];
+                            if (i == 1)
+                                b = Ribs[2];
+                            else
+                                b = Ribs[1];
+                        }
+                        else
+                        {
+                            b = Ribs[i];
+                            if (i == 1)
+                                c = Ribs[2];
+                            else
+                                c = Ribs[1];
+                        }
                         // I know that using goto is bad style, but in this case it is alriht. 
                         // It makes code much cleaner.
                         goto main;
                     }
-                main:
+            main:
             fixed (Point* points = Points)
             {
                 points[0] = A;
@@ -100,30 +127,10 @@ namespace CGeo
                 points[2] = C;
             }
             #endregion
-            #region Dictionaries with opposit nodes/ribs
-            Rib oppositeToA, oppositeToB;
-            if (Ribs[1].Points.Contains(A))
-            {
-                oppositeToA = Ribs[2];
-                oppositeToB = Ribs[1];
-            }
-            else
-            {
-                oppositeToA = Ribs[1];
-                oppositeToB = Ribs[2];
-            }
-            oppositeNodes = new Dictionary<Rib, Point>()
-            {
-                { oppositeToA, A },
-                { oppositeToB, B },
-                { Ribs[0], C }
-            };
-                oppositeRibs = new Dictionary<Point, Rib>()
-            {
-                { A, oppositeToA },
-                { B, oppositeToB },
-                { C, Ribs[0] }
-            };
+            #region Ribs            
+            Ribs[0] = a;
+            Ribs[1] = b;
+            Ribs[2] = c;
             #endregion
         }
 
