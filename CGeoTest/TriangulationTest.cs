@@ -40,6 +40,8 @@ namespace CGeoTest
             BC = new Rib(B, C, T, null);
             AC = new Rib(A, C, T, null);
             T.SetRibs(AB, BC, AC);
+            // Update triangles.
+            T.Update();
         }
 
         private void CreateT_D()
@@ -48,7 +50,8 @@ namespace CGeoTest
             BD = new Rib(B, D, T_D, null);
             CD = new Rib(C, D, T_D, null);
             T_D.SetRibs(BC, BD, CD);
-            BC.Update(null, T_D);         
+            BC.Update(null, T_D);
+            T_D.Update();   
         }
 
         [TestMethod]
@@ -97,6 +100,8 @@ namespace CGeoTest
             QT.SetRibs(QC, QB, BC);
             T1.SetRibs(AC, BC, AB);
             T2.SetRibs(AD, BD, AB);
+            // Update triangles.
+            Triangle.Update(LT, TT, RT, QT, T1, T2);
             #endregion
             #region Act
             Triangulation.Flip(T1, T2);
@@ -180,7 +185,7 @@ namespace CGeoTest
             Initialize();
             CreateT_D();
             // Act.
-            Triangulation.CheckAndFlip(T, new System.Collections.Generic.HashSet<Triangle>());
+            Triangulation.CheckAndFlip(T, new System.Collections.Generic.HashSet<Triangle>());            
             // Assert.            
             var tribs = T.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(B));
             tribs &= T.Ribs.Any(r => r.Points.Contains(B) && r.Points.Contains(D));
@@ -228,6 +233,8 @@ namespace CGeoTest
             BCD.SetRibs(BC, BD, CD);
             ABE.SetRibs(AB, AE, BE);
             ACF.SetRibs(AC, AF, CF);
+            // Update triangles.
+            Triangle.Update(ABC, BCD, ABE, ACF);
             #endregion
             //Act.
             var bc = Triangulation.GetSeparatingRib(ABC, D);

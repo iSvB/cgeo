@@ -8,55 +8,74 @@ namespace CGeo
 {
     public class Triangle
     {
+        #region Fields
+
+        private Dictionary<Rib, Point> oppositeNodes = new Dictionary<Rib, Point>(3);
+        private Dictionary<Point, Rib> oppositeRibs = new Dictionary<Point, Rib>(3);        
+
+        #endregion
         #region Properties
 
-        public Rib R1 { get; set; }
-        public Rib R2 { get; set; }
-        public Rib R3 { get; set; }
+        public Rib[] Ribs { get; } = new Rib[3];        
 
-        public IEnumerable<Rib> Ribs 
-        { 
-            get 
-            { 
-                yield return R1; 
-                yield return R2; 
-                yield return R3; 
-            } 
-        }
-
-        public IEnumerable<Point> Points { get { return Ribs.SelectMany(r => r.Points).Distinct(); } }
+        public Point[] Points { get; } = new Point[3];
 
         #endregion        
         #region Methods
 
         public Rib GetOppositeRib(Point vertex)
         {
-            return Ribs.Single(r => !r.Points.Contains(vertex));
+            Rib result;
+            if (oppositeRibs.TryGetValue(vertex, out result))
+                return result;
+            throw new ArgumentException();
         }
 
         public Point GetOppositeNode(Rib rib)
         {
-            return Points.Single(p => !rib.Points.Contains(p));
+            Point result;
+            if (oppositeNodes.TryGetValue(rib, out result))
+                return result;
+            throw new ArgumentException();
         }        
 
         public Rib GetAdjacentRib(Triangle T)
         {
-            return Ribs.Single(r => T.Ribs.Contains(r));
+            try
+            {
+                return Ribs.First(r => T.Ribs.Contains(r));
+            }
+            catch (Exception)
+            {
+                int x = 0;
+                throw;
+            }
         }
 
         public Rib GetRib(Point A, Point B)
         {
-            return Ribs.Single(r => r.Points.Contains(A) && r.Points.Contains(B));
+            foreach (var rib in Ribs)
+            {
+                if (rib.A.Equals(A))
+                    if (rib.B.Equals(B))
+                        return rib;
+                    else
+                        continue;
+                if (rib.A.Equals(B))
+                    if (rib.B.Equals(A))
+                        return rib;
+            }
+            throw new ArgumentException();
         }
 
         public void UpdateRib(Rib oldRib, Rib newRib)
         {
-            if (R1 == oldRib)
-                R1 = newRib;
-            else if (R2 == oldRib)
-                R2 = newRib;
-            else if (R3 == oldRib)
-                R3 = newRib;
+            if (Ribs[0] == oldRib)
+                Ribs[0] = newRib;
+            else if (Ribs[1] == oldRib)
+                Ribs[1] = newRib;
+            else if (Ribs[2] == oldRib)
+                Ribs[2] = newRib;
             else
                 throw new ArgumentException();
         }
@@ -64,16 +83,72 @@ namespace CGeo
         public bool IsAdjacent(Triangle T)
         {
             return Ribs.Any(r => r.Triangles.Contains(T));
-        }        
+        }
+
+        public unsafe void Update()
+        {            
+            #region Nodes
+            var A = Ribs[0].A;
+            var B = Ribs[0].B;
+            Point C = new Point();
+            for (var i = 1; i < 3; ++i)
+                foreach (var node in Ribs[i].Points)
+                    if (!node.Equals(A) && !node.Equals(B))
+                    {
+                        C = node;
+                        // I know that using goto is bad style, but in this case it is alriht. 
+                        // It makes code much cleaner.
+                        goto main;
+                    }
+                main:
+            fixed (Point* points = Points)
+            {
+                points[0] = A;
+                points[1] = B;
+                points[2] = C;
+            }
+            #endregion
+            #region Dictionaries with opposit nodes/ribs
+            Rib oppositeToA, oppositeToB;
+            if (Ribs[1].Points.Contains(A))
+            {
+                oppositeToA = Ribs[2];
+                oppositeToB = Ribs[1];
+            }
+            else
+            {
+                oppositeToA = Ribs[1];
+                oppositeToB = Ribs[2];
+            }
+            oppositeNodes = new Dictionary<Rib, Point>()
+            {
+                { oppositeToA, A },
+                { oppositeToB, B },
+                { Ribs[0], C }
+            };
+                oppositeRibs = new Dictionary<Point, Rib>()
+            {
+                { A, oppositeToA },
+                { B, oppositeToB },
+                { C, Ribs[0] }
+            };
+            #endregion
+        }
+
+        public static void Update(params Triangle[] triangles)
+        {
+            foreach (var t in triangles)
+                t.Update();
+        }
 
         #endregion
         #region Constructor
 
         public void SetRibs(Rib R1, Rib R2, Rib R3)
         {
-            this.R1 = R1;
-            this.R2 = R2;
-            this.R3 = R3;
+            Ribs[0] = R1;
+            Ribs[1] = R2;
+            Ribs[2] = R3;
         }
 
         #endregion

@@ -21,6 +21,7 @@ namespace Benchmark
             var sizes = new int[] { 100, 1000, 10000, 100000, 1000000 };
             foreach (var size in sizes)
                 RunTest(size);
+            Console.WriteLine("Done!");
             Console.ReadKey(false);
         }
 

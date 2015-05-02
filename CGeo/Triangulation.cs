@@ -167,6 +167,9 @@ namespace CGeo
             T.UpdateRib(BC, OC);
             // Change vertex B of old adjacent rib to passed node.
             rib.B = node;
+            // Update triangles.
+            T.Update();
+            NT.Update();
             // Set newTriangles out parameter.
             newTriangles = new Triangle[] { NT };
             // Return modified triangles.
@@ -212,6 +215,11 @@ namespace CGeo
             RT.UpdateRib(BD, OD);
             // Change vertex B of old adjacent rib to passed node.
             rib.B = node;
+            // Update triangles.
+            LT.Update();
+            RT.Update();
+            NLT.Update();
+            NRT.Update();
             // Set newTriangles out parameter.
             newTriangles = new Triangle[] { NLT, NRT };
             // Return modified triangles.
@@ -228,9 +236,9 @@ namespace CGeo
         {   
             // Vertices.
             // node == O
-            var A = T.R1.A;
-            var B = T.R1.B;
-            var C = T.R2.Points.First(p => !p.Equals(A) && !p.Equals(B));
+            var A = T.Points[0];
+            var B = T.Points[1];
+            var C = T.Points[2];
             // Triangles.
             var LT = new Triangle();
             var RT = new Triangle();
@@ -256,6 +264,10 @@ namespace CGeo
             // Add new triangles to triangulation.
             triangles.Add(LT);
             triangles.Add(RT);
+            // Update triangles.
+            T.Update();
+            LT.Update();
+            RT.Update();
             // Return new and modified triangles.
             return new Triangle[] { T, LT, RT };
         }
@@ -454,6 +466,9 @@ namespace CGeo
             T2.UpdateRib(adjacentRib, CD);
             T1.UpdateRib(BC, AD);
             T2.UpdateRib(AD, BC);
+            // Update triangles.
+            T1.Update();
+            T2.Update();
         }
 
         #endregion        
@@ -482,6 +497,9 @@ namespace CGeo
             // Set ribs for triangles.
             left.SetRibs(leftRib, bottomRib, diagonal);
             right.SetRibs(rightRib, topRib, diagonal);
+            // Update triangles.
+            left.Update();
+            right.Update();
             // Add triangles to cache.
             cache.Initialize(left, right, left, right);
             // Return superstructure.
