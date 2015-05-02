@@ -34,9 +34,10 @@ namespace CGeo
         /// <summary>
         /// Increment count of nodes.
         /// </summary>
-        public void IncrementNodeCount()
+        public void IncrementNodeCount(int count)
         {
-            if (++n == limit)
+            n += count;
+            if (n >= limit)
                 IncreaseSize();
         }
 
@@ -94,6 +95,7 @@ namespace CGeo
             cache = newCache;
             m = newSize;
             limit = growthRate * m * m;
+            UpdateUnitSize();
         }
 
         private void UpdateUnitSize()

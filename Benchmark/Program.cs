@@ -31,9 +31,10 @@ namespace Benchmark
             var sw = Stopwatch.StartNew();
             var triangulation = new Triangulation(topLeft, bottomRight, nodes);
             sw.Stop();
-            var logMsg = string.Format("10^{0}: {1}", Math.Log10(size), sw.Elapsed);
+            var logMsg = string.Format("{0}   10^{1}: {2}", DateTime.Now, Math.Log10(size), sw.Elapsed);
             Console.WriteLine(logMsg);            
             File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + logMsg + "\r\n");
+            triangulation = null;
             GC.Collect(2);
         }
 

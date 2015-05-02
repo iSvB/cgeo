@@ -41,15 +41,7 @@ namespace CGeo
 
         public Rib GetAdjacentRib(Triangle T)
         {
-            try
-            {
-                return Ribs.First(r => T.Ribs.Contains(r));
-            }
-            catch (Exception)
-            {
-                int x = 0;
-                throw;
-            }
+            return Ribs.First(r => T.Ribs.Contains(r));
         }
 
         public Rib GetRib(Point A, Point B)

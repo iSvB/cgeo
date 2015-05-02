@@ -51,7 +51,7 @@ namespace CGeo
         {
             Rib separatingRib = GetSeparatingRib(T, node);
             while (separatingRib != null)
-            {                
+            {
                 T = separatingRib.GetAdjacent(T);
                 separatingRib = GetSeparatingRib(T, node);        
             }
@@ -109,7 +109,7 @@ namespace CGeo
             if (newAndModifiedTriangles == null)
                 newAndModifiedTriangles = PutPointInTriangle(targetTriangle, node, out newTriangles);
             // Increase cache's counter of nodes.
-            cache.IncrementNodeCount();
+            cache.IncrementNodeCount(newTriangles.Count());
             // Add new triangles to cache.
             foreach (var T in newTriangles)
                 cache.Update(T);
