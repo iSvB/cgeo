@@ -14,4 +14,4 @@ Step 3. Add node to triangulation.
 Step 4. Check Delaunay condition for new triangles and perform required changes.
 
 ## Convex hull
-Graham scan (Not implemented yet).
+Graham scan.

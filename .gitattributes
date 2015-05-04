@@ -64,3 +64,5 @@
 *.jpg filter=lfs -crlf
 *.jpeg filter=lfs -crlf
 *.bmp filter=lfs -crlf
+*.exe filter=lfs -crlf
+*.dll filter=lfs -crlf
