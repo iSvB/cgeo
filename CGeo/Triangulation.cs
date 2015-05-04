@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("CGeoTest")]
@@ -16,13 +14,13 @@ namespace CGeo
     /// Algorithm:
     /// Step 1. Create superstructure.
     /// Step 2. Perform step 2-3 for each node from input.
-    /// Step 2. Add node to triangulation.
+    /// Step 3. Add node to triangulation.
     ///     A) Find triangle in which falls this node (or on rib).
     ///     B) If node lies in epsilon-neighborhood of any vertex of triangle - ignore this node.
     ///     C) If node fall on rib, then this rib splits on two new, and each triangle adjacent with this rib
     ///        also splits in two new.
     ///     D) If node falls in triangle - split this triangle in three new.
-    /// Step 3. Check Delaunay condition for new triangles and perform required changes.
+    /// Step 4. Check Delaunay condition for new triangles and perform required changes.
     /// </remarks>
     public class Triangulation : IEnumerable<Triangle>
     {
@@ -32,6 +30,9 @@ namespace CGeo
         /// Set of triangles that represent Delaunay triangulation.
         /// </summary>
         private ICollection<Triangle> triangles;
+        /// <summary>
+        /// Dynamic cache for fast search of closest to passed node triangle.
+        /// </summary>
         private DynamicCache cache;
 
         #endregion
@@ -92,7 +93,7 @@ namespace CGeo
             var initTriangle = cache.Get(node);
             Triangle targetTriangle = FindTriangleBySeparatingRibs(node, initTriangle);
             // If there are vertex that lies in epsilon-neighborhood of node - then ignore this node.
-            if (targetTriangle.Points.Any(p => p.IsInEpsilonArea(node)))
+            if (targetTriangle.Vertices.Any(p => p.IsInEpsilonArea(node)))
                 return null;
             // List of new and modified triangles.
             IEnumerable<Triangle> newAndModifiedTriangles = null;
@@ -236,9 +237,9 @@ namespace CGeo
         {   
             // Vertices.
             // node == O
-            var A = T.Points[0];
-            var B = T.Points[1];
-            var C = T.Points[2];
+            var A = T.Vertices[0];
+            var B = T.Vertices[1];
+            var C = T.Vertices[2];
             // Triangles.
             var LT = new Triangle();
             var RT = new Triangle();
@@ -446,26 +447,33 @@ namespace CGeo
         /// </summary>        
         internal static void Flip(Triangle T1, Triangle T2)
         {
-            var adjacentRib = T1.GetAdjacentRib(T2);
+            int t1AdjacentRibIndex = T1.GetAdjacentRibIndex(T2);
+            Rib adjacentRib = T1.Ribs[t1AdjacentRibIndex];
+            int t2AdjacentRibIndex = T2.GetIndex(adjacentRib);            
             // Vertices of the adjacent rib.
-            Point A = adjacentRib.A;
-            Point B = adjacentRib.B;
+            int A = T1.GetIndex(T1.Ribs[t1AdjacentRibIndex].A);
+            int A2 = T2.GetIndex(T1.Vertices[A]);
+            int B = T1.GetIndex(T1.Ribs[t1AdjacentRibIndex].B);
             // Vertices, opposite to adjacent rib.
-            Point C = T1.GetOppositeNode(adjacentRib);
-            Point D = T2.GetOppositeNode(adjacentRib);
-            // Update of links to adjacent triangles required for next ribs:
-            Rib BC = T1.GetRib(B, C);
-            Rib AD = T2.GetRib(A, D);
+            int C = T1.GetOppositeNodeIndex(t1AdjacentRibIndex);
+            Point CPoint = T1.Vertices[C];
+            int D = T2.GetOppositeNodeIndex(t2AdjacentRibIndex);
+            Point DPoint = T2.Vertices[D];
+            // Update of links to adjacent triangles required for next ribs:                                           
+            int t1BC = T1.GetRibIndex(B, C);
+            Rib BC = T1.Ribs[t1BC];
+            int t2AD = T2.GetRibIndex(A2, D);
+            Rib AD = T2.Ribs[t2AD];
             // New adjacent rib.
-            var CD = new Rib(C, D, T1, T2);
+            Rib CD = new Rib(CPoint, DPoint, T1, T2);
             // Update links to triangles.
             BC.Update(T1, T2);
             AD.Update(T2, T1);
             // Update triangles' ribs.
-            T1.UpdateRib(adjacentRib, CD);
-            T2.UpdateRib(adjacentRib, CD);
-            T1.UpdateRib(BC, AD);
-            T2.UpdateRib(AD, BC);
+            T1.UpdateRib(t1AdjacentRibIndex, CD);
+            T2.UpdateRib(t2AdjacentRibIndex, CD);
+            T1.UpdateRib(t1BC, AD);
+            T2.UpdateRib(t2AD, BC);
             // Update triangles.
             T1.Update();
             T2.Update();

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CGeo
 {
@@ -10,18 +7,39 @@ namespace CGeo
     {
         #region Properties
 
+        /// <summary>
+        /// Ribs of triangle.
+        /// </summary>
+        /// <remarks>
+        /// First rib matches vertices 0 & 1.
+        /// Second rib matches vertices 1 & 2.
+        /// Third rib matches vertices 0 & 2.
+        /// </remarks>
         public Rib[] Ribs { get; } = new Rib[3];        
 
-        public Point[] Points { get; } = new Point[3];
+        /// <summary>
+        /// Vertices of triangle.
+        /// </summary>
+        /// <remarks>
+        /// First vertex belongs to ribs 0 & 2.
+        /// Second vertex belongs to ribs 0 & 1.
+        /// Third vertex belongs to ribs 1 & 2.
+        /// </remarks>
+        public Point[] Vertices { get; } = new Point[3];
 
         #endregion        
         #region Methods
 
+        /// <summary>
+        /// Returns opposite to passed vertex rib.
+        /// </summary>
+        /// <param name="vertex">Vertex of triangle.</param>
+        /// <returns>Opposite to passed vertex rib.</returns>
         public Rib GetOppositeRib(Point vertex)
         {
             int i = 0;
             for (; i < 3; ++i)
-                if (Points[i].Equals(vertex))
+                if (Vertices[i].Equals(vertex))
                     break;
             switch (i)
             {
@@ -32,6 +50,11 @@ namespace CGeo
             throw new ArgumentException();
         }
 
+        /// <summary>
+        /// Returns opposite to passsed rib node.
+        /// </summary>
+        /// <param name="rib">Rib that belongs to this triangle.</param>
+        /// <returns>Opposite to passed rib vertex.</returns>
         public Point GetOppositeNode(Rib rib)
         {
             int i = 0;
@@ -40,34 +63,118 @@ namespace CGeo
                     break;
             switch (i)
             {
-                case 0: return Points[2];
-                case 1: return Points[0];
-                case 2: return Points[1];
+                case 0: return Vertices[2];
+                case 1: return Vertices[0];
+                case 2: return Vertices[1];
             }
             throw new ArgumentException();
         }        
-
-        public Rib GetAdjacentRib(Triangle T)
+        
+        /// <summary>
+        /// Returns index of adjacent rib.
+        /// </summary>
+        /// <param name="T">Adjacent triangle.</param>
+        /// <returns>Index of adjacent rib.</returns>
+        public int GetAdjacentRibIndex(Triangle T)
         {
-            return Ribs.First(r => T.Ribs.Contains(r));
-        }
-
-        public Rib GetRib(Point A, Point B)
-        {
-            foreach (var rib in Ribs)
+            for (int i = 0; i < 3; ++i)
             {
-                if (rib.A.Equals(A))
-                    if (rib.B.Equals(B))
-                        return rib;
-                    else
-                        continue;
-                if (rib.A.Equals(B))
-                    if (rib.B.Equals(A))
-                        return rib;
+                var rib = Ribs[i];
+                if (rib.T1 == T || rib.T2 == T)
+                    return i;                                    
             }
             throw new ArgumentException();
         }
 
+        /// <summary>
+        /// Returns index of opposite to passed rib node.
+        /// </summary>
+        /// <param name="ribIndex">Index of rib.</param>
+        /// <returns>Index of opposite to passed rib node.</returns>
+        public int GetOppositeNodeIndex(int ribIndex)
+        {            
+            switch (ribIndex)
+            {
+                case 0: return 2;
+                case 1: return 0;
+                case 2: return 1;
+            }
+            throw new ArgumentException();
+        }
+
+        /// <summary>
+        /// Returns index of vertex in array of vertices.
+        /// </summary>
+        /// <returns>Index of passed vertex.</returns>
+        public int GetIndex(Point vertex)
+        {            
+            for (int i = 0; i < 3; ++i)
+                if (Vertices[i].Equals(vertex))
+                    return i;
+            throw new ArgumentException();
+        }
+
+        /// <summary>
+        /// Returns index of passed rib in array of ribs.
+        /// </summary>
+        /// <returns>Index of passed rib.</returns>
+        public int GetIndex(Rib rib)
+        {            
+            for (int i = 0; i < 3; ++i)
+                if (Ribs[i] == rib)
+                    return i;
+            throw new ArgumentException();
+        }
+
+        /// <summary>
+        /// Returns index of rib that contains passed nodes.
+        /// </summary>
+        /// <returns>Index of rib that contains passed nodes.</returns>
+        public int GetRibIndex(int A, int B)
+        {
+            int a = Math.Min(A, B);
+            int b = Math.Max(A, B);
+            // a == 0.
+            // b == 1 | 2.
+            if (a == 0)
+            {
+                if (b == 1)
+                    return 0;
+                // b == 2.
+                return 2;
+            }
+            // a == 1.
+            // b == 2.
+            return 1;
+        }
+
+        /// <summary>
+        /// Update link to rib by index <code>index</code> with a link to rib <code>newRib</code>.
+        /// </summary>
+        /// <param name="index">Index of updated rib.</param>
+        /// <param name="newRib">
+        /// New rib that will be accessible by index <code>index</code> ufter update.
+        /// </param>
+        public void UpdateRib(int index, Rib newRib)
+        {            
+            Ribs[index] = newRib;
+        }
+
+        /// <summary>
+        /// Returns rib that contains passed points.
+        /// </summary>
+        /// <returns>Rib that contains passed points.</returns>
+        public Rib GetRib(Point A, Point B)
+        {
+            foreach (var rib in Ribs)
+                if (rib.A.Equals(A) && rib.B.Equals(B) || rib.A.Equals(B) && rib.B.Equals(A))
+                    return rib;
+            throw new ArgumentException();
+        }
+
+        /// <summary>
+        /// Updates rib <code>oldRib</code> with a <code>newRib</code>.
+        /// </summary>
         public void UpdateRib(Rib oldRib, Rib newRib)
         {
             if (Ribs[0] == oldRib)
@@ -80,69 +187,78 @@ namespace CGeo
                 throw new ArgumentException();
         }
 
+        /// <summary>
+        /// Determines whether this triangle adjacent with <code>T</code> or not.
+        /// </summary>
+        /// <returns>True - if <code>T</code> is adjacent with this triangle, otherwise - false.</returns>
         public bool IsAdjacent(Triangle T)
         {
             return Ribs.Any(r => r.Triangles.Contains(T));
         }
 
+        /// <summary>
+        /// Update triangle's internal representation.
+        /// Sorting ribs and vertices in such way that first rib would match rib that lies on first & second
+        /// vertices, second rib would match rib that lies on second & third vertices, and third rib would match
+        /// rib that lies on firs & third vertices.
+        /// </summary>
         public unsafe void Update()
         {
             Rib a = Ribs[0];
             Rib b = null;
             Rib c = null;
-            #region Nodes
             var A = a.A;
             var B = a.B;
             Point C = new Point();
-            for (var i = 1; i < 3; ++i)
-                foreach (var node in Ribs[i].Points)
-                    if (!node.Equals(A) && !node.Equals(B))
-                    {
-                        C = node;
-                        if (Ribs[i].A.Equals(A) || Ribs[i].B.Equals(A))
-                        {
-                            c = Ribs[i];
-                            if (i == 1)
-                                b = Ribs[2];
-                            else
-                                b = Ribs[1];
-                        }
-                        else
-                        {
-                            b = Ribs[i];
-                            if (i == 1)
-                                c = Ribs[2];
-                            else
-                                c = Ribs[1];
-                        }
-                        // I know that using goto is bad style, but in this case it is alriht. 
-                        // It makes code much cleaner.
-                        goto main;
-                    }
-            main:
-            fixed (Point* points = Points)
+            var r1 = Ribs[1];
+            if (r1.A.Equals(A))
+            {
+                b = Ribs[2];
+                c = r1;
+                C = r1.B;
+            }
+            else if (r1.B.Equals(A))
+            {
+                b = Ribs[2];
+                c = r1;
+                C = r1.A;
+            }
+            else if (r1.A.Equals(B))
+            {
+                b = r1;
+                c = Ribs[2];
+                C = r1.B;
+            }
+            else if (r1.B.Equals(B))
+            {
+                b = r1;
+                c = Ribs[2];
+                C = r1.A;
+            }
+            fixed (Point* points = Vertices)
             {
                 points[0] = A;
                 points[1] = B;
                 points[2] = C;
-            }
-            #endregion
-            #region Ribs            
+            }          
             Ribs[0] = a;
             Ribs[1] = b;
             Ribs[2] = c;
-            #endregion
         }
 
+        /// <summary>
+        /// Update collection of triangles.
+        /// </summary>
+        /// <param name="triangles">Collection that will be updated.</param>
         public static void Update(params Triangle[] triangles)
         {
             foreach (var t in triangles)
                 t.Update();
         }
 
-        #endregion
-        #region Constructor
-
+        /// <summary>
+        /// Set ribs to triangle.
+        /// </summary>
         public void SetRibs(Rib R1, Rib R2, Rib R3)
         {
             Ribs[0] = R1;

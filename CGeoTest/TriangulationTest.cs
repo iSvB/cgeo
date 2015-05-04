@@ -190,11 +190,11 @@ namespace CGeoTest
             var tribs = T.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(B));
             tribs &= T.Ribs.Any(r => r.Points.Contains(B) && r.Points.Contains(D));
             tribs &= T.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(D));
-            tribs &= T.Points.Count() == 3;
+            tribs &= T.Vertices.Count() == 3;
             var t_dribs = T_D.Ribs.Any(r => r.Points.Contains(C) && r.Points.Contains(D));
             t_dribs &= T_D.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(C));
             t_dribs &= T_D.Ribs.Any(r => r.Points.Contains(A) && r.Points.Contains(D));
-            t_dribs &= T_D.Points.Count() == 3;
+            t_dribs &= T_D.Vertices.Count() == 3;
 
             Assert.IsTrue(tribs);
             Assert.IsTrue(t_dribs);

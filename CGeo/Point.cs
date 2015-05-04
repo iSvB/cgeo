@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CGeo
+﻿namespace CGeo
 {
+    /// <summary>
+    /// Point in two-dimensional cartesian coordinate system.
+    /// </summary>
     public struct Point
     {        
         public double X;
@@ -19,6 +16,12 @@ namespace CGeo
             this.Y = Y;
         }
 
+        /// <summary>
+        /// Determines, whether point located in epsilon-neighborhood of point <code>p</code> or not.
+        /// </summary>
+        /// <returns>
+        /// True - if this point located in epsilon-neighborhood of point <code>p</code>, otherwise - false.
+        /// </returns>
         public bool IsInEpsilonArea(Point p)
         {
             if (p.X.IsInEpsilonArea(X) && p.Y.IsInEpsilonArea(Y))
