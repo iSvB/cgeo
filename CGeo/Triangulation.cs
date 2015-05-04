@@ -16,7 +16,7 @@ namespace CGeo
     /// Step 2. Perform step 2-3 for each node from input.
     /// Step 3. Add node to triangulation.
     ///     A) Find triangle in which falls this node (or on rib).
-    ///     B) If node lies in epsilon-neighborhood of any vertex of triangle - ignore this node.
+    ///     B) If node lays in epsilon-neighborhood of any vertex of triangle - ignore this node.
     ///     C) If node fall on rib, then this rib splits on two new, and each triangle adjacent with this rib
     ///        also splits in two new.
     ///     D) If node falls in triangle - split this triangle in three new.
@@ -83,7 +83,7 @@ namespace CGeo
         /// <returns>Set of new/modified triangles.</returns>
         /// <remarks>
         /// 1) Find triangle in which falls this node (or on rib).
-        /// 2) If node lies in epsilon-neighborhood of any vertex of triangle - ignore this node.
+        /// 2) If node lays in epsilon-neighborhood of any vertex of triangle - ignore this node.
         /// 3) If node fall on rib, then this rib splits on two new, and each triangle adjacent with this rib
         ///    also splits in two new.
         /// 4) If node falls in triangle - split this triangle in three new.
@@ -92,7 +92,7 @@ namespace CGeo
         {            
             var initTriangle = cache.Get(node);
             Triangle targetTriangle = FindTriangleBySeparatingRibs(node, initTriangle);
-            // If there are vertex that lies in epsilon-neighborhood of node - then ignore this node.
+            // If there are vertex that lays in epsilon-neighborhood of node - then ignore this node.
             if (targetTriangle.Vertices.Any(p => p.IsInEpsilonArea(node)))
                 return null;
             // List of new and modified triangles.
@@ -140,7 +140,7 @@ namespace CGeo
         }
 
         /// <summary>
-        /// Put node on rib that lies on the bounds of superstructure.
+        /// Put node on rib that lays on the bounds of superstructure.
         /// </summary>
         /// <param name="newTriangles">Collection of new triangles.</param>
         /// <returns>Modified triangles.</returns>

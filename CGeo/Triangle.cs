@@ -198,9 +198,9 @@ namespace CGeo
 
         /// <summary>
         /// Update triangle's internal representation.
-        /// Sorting ribs and vertices in such way that first rib would match rib that lies on first & second
-        /// vertices, second rib would match rib that lies on second & third vertices, and third rib would match
-        /// rib that lies on firs & third vertices.
+        /// Sorting ribs and vertices in such way that first rib would match rib that lays on first & second
+        /// vertices, second rib would match rib that lays on second & third vertices, and third rib would match
+        /// rib that lays on firs & third vertices.
         /// </summary>
         public unsafe void Update()
         {

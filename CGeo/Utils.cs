@@ -22,9 +22,8 @@ namespace CGeo
         /// </summary>
         /// <returns>True - if points are in clockwise order.</returns>
         public static bool IsClockwiseOrdered(Point A, Point B, Point C)
-        {
-            var c = CrossProductZ(C, A, C, B);
-            return c < 0;
+        {            
+            return CrossProductZ(C, A, C, B) < 0;
         }
 
         /// <summary>
@@ -36,11 +35,11 @@ namespace CGeo
         public static bool IsSeparated(Point O, Point A, Point X, Point Y)
         {
             // Use sign of pseudoscalar vector product - it defines half-plane.
-            // If sign of OA ^ OX is same as sign of OA ^ OY - points X & Y lies on same half-plane, otherwise not.
+            // If sign of OA ^ OX is same as sign of OA ^ OY - points X & Y lays on same half-plane, otherwise not.
             var OA = new Vector(O, A);
             var oxSign = Math.Sign(PseudoscalarVectorProduct(OA, new Vector(O, X)));
             var oySign = Math.Sign(PseudoscalarVectorProduct(OA, new Vector(O, Y)));
-            // If sign is equal to 0 then one of points lies on the line, therefore points are not separated.
+            // If sign is equal to 0 then one of points lays on the line, therefore points are not separated.
             if (oxSign == 0 || oySign == 0)
                 return false;
             return oxSign != oySign;
@@ -56,9 +55,9 @@ namespace CGeo
         }
 
         /// <summary>
-        /// Determines whether y lies in epsilon-neighborhood of x.
+        /// Determines whether y lays in epsilon-neighborhood of x.
         /// </summary>
-        /// <returns>True - if y lies in epsilon-neighborhood of x, otherwise - false.</returns>
+        /// <returns>True - if y lays in epsilon-neighborhood of x, otherwise - false.</returns>
         public static bool IsInEpsilonArea(this double x, double y, double epsilon = 10e-6)
         {
             if (Math.Abs(x - y) <= epsilon)
@@ -87,6 +86,15 @@ namespace CGeo
             A = O.Y - X.Y;
             B = X.X - O.X;
             C = O.X * X.Y - X.X * O.Y;
+        }
+
+        /// <summary>
+        /// Determines, whether axis OA and OB forms left-handed coordinate system, or not.
+        /// </summary>
+        /// <returns>True - if OA & OB forms left-handed coordinate system.</returns>
+        public static bool IsLeftHanded(Point A, Point O, Point B)
+        {
+            return CrossProductZ(O, B, O, A) < 0;
         }
     }
 }
