@@ -28,4 +28,4 @@ Graham scan.
   3. While axis *b-a* & *b-cur* forms left-handed coordinate system remove last added point from hull.
   4. Add *cur* to convex hull.
 
-![alt tag](https://raw.githubusercontent.com/iSvB/cgeo/master/Images/hull_50.bmp)
+![alt tag](https://raw.githubusercontent.com/iSvB/cgeo/master/Images/hull-50.bmp)
