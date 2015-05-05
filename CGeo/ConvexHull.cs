@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace CGeo
 {
+    /// <summary>
+    /// Contains method of computing convex hull.
+    /// </summary>
     public static class ConvexHull
     {
         #region Nested data structures
@@ -38,10 +41,16 @@ namespace CGeo
             }
 
             #endregion
-        }    
-        
-        #endregion
+        }
 
+        #endregion
+        #region Methods
+
+        /// <summary>
+        /// Compute convex hull of set of points.
+        /// </summary>
+        /// <param name="points">Set of points.</param>
+        /// <returns>Convex hull of set of points.</returns>        
         public static IList<Point> GrahamScan(IList<Point> points)
         {
             if (points.Count <= 3)
@@ -89,20 +98,24 @@ namespace CGeo
             return resultHull;
         }
 
-        // Находит нижнюю точку
-        // Если таких точек несколько, то возвращает самую левую из них
+        /// <summary>
+        /// Returns index of the bottom left point.
+        /// </summary>        
         private static int BottomLeft(IList<Point> points)
         {
             int result = 0;
             for (int i = 1; i < points.Count; ++i)
             {
-                // Если точка находится ниже, 
-                // либо на одной координате по Y, но левее - запоминаем её                
+                // If current point is located lower then result,
+                // or they have same Y-axis coordinate and current node have less X-axis corrdinate - 
+                // update result index.
                 if (points[i].Y < points[result].Y ||
                    (points[i].Y == points[result].Y && points[i].X < points[result].X))
                     result = i;
             }
             return result;
         }
+        
+        #endregion
     }
 }

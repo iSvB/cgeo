@@ -11,8 +11,8 @@ namespace Benchmark
 {
     class Program
     {        
-        private static int maxX = 1000;
-        private static int maxY = 1000;
+        private static int maxX = 250;
+        private static int maxY = 250;
         private static CGPoint topLeft = new CGPoint(0, 0);
         private static CGPoint bottomRight = new CGPoint(maxX, maxY);
         private static int loopCount = 1;
